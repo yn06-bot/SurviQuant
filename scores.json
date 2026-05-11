@@ -1,0 +1,344 @@
+{
+  "meta": {
+    "project": "SurviQuant",
+    "reference_date": "2026-04-24",
+    "horizon_days": 20,
+    "event_definition": {
+      "profit_event": "매수 시점 대비 +10% 도달",
+      "loss_event": "매수 시점 대비 -10% 도달"
+    },
+    "universe": {
+      "survival_records_tickers": 223,
+      "modeled_tickers": 50,
+      "note": "EDA·생존레코드는 전 종목, RSF 학습·추론은 5섹터 대표 50종목"
+    },
+    "model_performance_c_index": {
+      "profit_model": 0.7087,
+      "loss_model": 0.7681
+    },
+    "persona_weights": {
+      "aggressive": {
+        "profit": 0.69,
+        "loss_defense": 0.31,
+        "lambda": 0.44
+      },
+      "neutral": {
+        "profit": 0.5,
+        "loss_defense": 0.5,
+        "lambda": 1.0
+      },
+      "conservative": {
+        "profit": 0.31,
+        "loss_defense": 0.69,
+        "lambda": 2.25
+      }
+    },
+    "signal_thresholds": {
+      "strong_buy": 60,
+      "accumulate": 50,
+      "neutral": 40
+    }
+  },
+  "scores": [
+    {
+      "Ticker": "ANET",
+      "Sector": "Information Technology",
+      "Profit_Chance": 57.69,
+      "Loss_Risk": 19.12
+    },
+    {
+      "Ticker": "AMAT",
+      "Sector": "Information Technology",
+      "Profit_Chance": 61.08,
+      "Loss_Risk": 27.0
+    },
+    {
+      "Ticker": "COHR",
+      "Sector": "Information Technology",
+      "Profit_Chance": 61.5,
+      "Loss_Risk": 29.39
+    },
+    {
+      "Ticker": "CDNS",
+      "Sector": "Information Technology",
+      "Profit_Chance": 57.27,
+      "Loss_Risk": 25.68
+    },
+    {
+      "Ticker": "ADI",
+      "Sector": "Information Technology",
+      "Profit_Chance": 52.01,
+      "Loss_Risk": 19.34
+    },
+    {
+      "Ticker": "CVNA",
+      "Sector": "Consumer Discretionary",
+      "Profit_Chance": 58.0,
+      "Loss_Risk": 28.41
+    },
+    {
+      "Ticker": "APA",
+      "Sector": "Energy",
+      "Profit_Chance": 56.61,
+      "Loss_Risk": 27.18
+    },
+    {
+      "Ticker": "BSX",
+      "Sector": "Health Care",
+      "Profit_Chance": 54.54,
+      "Loss_Risk": 24.1
+    },
+    {
+      "Ticker": "AVGO",
+      "Sector": "Information Technology",
+      "Profit_Chance": 55.01,
+      "Loss_Risk": 27.49
+    },
+    {
+      "Ticker": "ACN",
+      "Sector": "Information Technology",
+      "Profit_Chance": 49.22,
+      "Loss_Risk": 19.55
+    },
+    {
+      "Ticker": "BKR",
+      "Sector": "Energy",
+      "Profit_Chance": 49.03,
+      "Loss_Risk": 20.09
+    },
+    {
+      "Ticker": "APH",
+      "Sector": "Information Technology",
+      "Profit_Chance": 49.46,
+      "Loss_Risk": 22.8
+    },
+    {
+      "Ticker": "APP",
+      "Sector": "Information Technology",
+      "Profit_Chance": 56.29,
+      "Loss_Risk": 37.98
+    },
+    {
+      "Ticker": "BAX",
+      "Sector": "Health Care",
+      "Profit_Chance": 42.97,
+      "Loss_Risk": 19.66
+    },
+    {
+      "Ticker": "ALGN",
+      "Sector": "Health Care",
+      "Profit_Chance": 45.1,
+      "Loss_Risk": 25.3
+    },
+    {
+      "Ticker": "APTV",
+      "Sector": "Consumer Discretionary",
+      "Profit_Chance": 45.22,
+      "Loss_Risk": 26.11
+    },
+    {
+      "Ticker": "CTSH",
+      "Sector": "Information Technology",
+      "Profit_Chance": 40.79,
+      "Loss_Risk": 19.74
+    },
+    {
+      "Ticker": "BKNG",
+      "Sector": "Consumer Discretionary",
+      "Profit_Chance": 41.95,
+      "Loss_Risk": 22.45
+    },
+    {
+      "Ticker": "CCL",
+      "Sector": "Consumer Discretionary",
+      "Profit_Chance": 49.54,
+      "Loss_Risk": 34.4
+    },
+    {
+      "Ticker": "CIEN",
+      "Sector": "Information Technology",
+      "Profit_Chance": 53.44,
+      "Loss_Risk": 41.06
+    },
+    {
+      "Ticker": "CNC",
+      "Sector": "Health Care",
+      "Profit_Chance": 41.31,
+      "Loss_Risk": 23.18
+    },
+    {
+      "Ticker": "AMZN",
+      "Sector": "Consumer Discretionary",
+      "Profit_Chance": 41.33,
+      "Loss_Risk": 23.44
+    },
+    {
+      "Ticker": "ABNB",
+      "Sector": "Consumer Discretionary",
+      "Profit_Chance": 41.91,
+      "Loss_Risk": 24.79
+    },
+    {
+      "Ticker": "CDW",
+      "Sector": "Information Technology",
+      "Profit_Chance": 38.1,
+      "Loss_Risk": 21.35
+    },
+    {
+      "Ticker": "BIIB",
+      "Sector": "Health Care",
+      "Profit_Chance": 38.7,
+      "Loss_Risk": 24.6
+    },
+    {
+      "Ticker": "AMD",
+      "Sector": "Information Technology",
+      "Profit_Chance": 50.99,
+      "Loss_Risk": 44.31
+    },
+    {
+      "Ticker": "TECH",
+      "Sector": "Health Care",
+      "Profit_Chance": 42.12,
+      "Loss_Risk": 31.15
+    },
+    {
+      "Ticker": "ADBE",
+      "Sector": "Information Technology",
+      "Profit_Chance": 40.76,
+      "Loss_Risk": 30.27
+    },
+    {
+      "Ticker": "BBY",
+      "Sector": "Consumer Discretionary",
+      "Profit_Chance": 33.56,
+      "Loss_Risk": 20.61
+    },
+    {
+      "Ticker": "ADSK",
+      "Sector": "Information Technology",
+      "Profit_Chance": 38.37,
+      "Loss_Risk": 29.52
+    },
+    {
+      "Ticker": "CRL",
+      "Sector": "Health Care",
+      "Profit_Chance": 42.41,
+      "Loss_Risk": 36.19
+    },
+    {
+      "Ticker": "AKAM",
+      "Sector": "Information Technology",
+      "Profit_Chance": 42.23,
+      "Loss_Risk": 39.47
+    },
+    {
+      "Ticker": "CMG",
+      "Sector": "Consumer Discretionary",
+      "Profit_Chance": 26.05,
+      "Loss_Risk": 15.95
+    },
+    {
+      "Ticker": "A",
+      "Sector": "Health Care",
+      "Profit_Chance": 24.71,
+      "Loss_Risk": 19.55
+    },
+    {
+      "Ticker": "CSCO",
+      "Sector": "Information Technology",
+      "Profit_Chance": 22.55,
+      "Loss_Risk": 17.28
+    },
+    {
+      "Ticker": "CHTR",
+      "Sector": "Communication Services",
+      "Profit_Chance": 46.2,
+      "Loss_Risk": 55.33
+    },
+    {
+      "Ticker": "GOOGL",
+      "Sector": "Communication Services",
+      "Profit_Chance": 25.03,
+      "Loss_Risk": 26.4
+    },
+    {
+      "Ticker": "CI",
+      "Sector": "Health Care",
+      "Profit_Chance": 23.08,
+      "Loss_Risk": 24.4
+    },
+    {
+      "Ticker": "ABT",
+      "Sector": "Health Care",
+      "Profit_Chance": 21.82,
+      "Loss_Risk": 23.84
+    },
+    {
+      "Ticker": "AMGN",
+      "Sector": "Health Care",
+      "Profit_Chance": 12.84,
+      "Loss_Risk": 10.97
+    },
+    {
+      "Ticker": "CVX",
+      "Sector": "Energy",
+      "Profit_Chance": 20.35,
+      "Loss_Risk": 22.9
+    },
+    {
+      "Ticker": "GOOG",
+      "Sector": "Communication Services",
+      "Profit_Chance": 21.87,
+      "Loss_Risk": 25.62
+    },
+    {
+      "Ticker": "AZO",
+      "Sector": "Consumer Discretionary",
+      "Profit_Chance": 17.8,
+      "Loss_Risk": 21.96
+    },
+    {
+      "Ticker": "AAPL",
+      "Sector": "Information Technology",
+      "Profit_Chance": 17.87,
+      "Loss_Risk": 22.26
+    },
+    {
+      "Ticker": "ABBV",
+      "Sector": "Health Care",
+      "Profit_Chance": 16.31,
+      "Loss_Risk": 24.25
+    },
+    {
+      "Ticker": "CAH",
+      "Sector": "Health Care",
+      "Profit_Chance": 12.16,
+      "Loss_Risk": 18.12
+    },
+    {
+      "Ticker": "COR",
+      "Sector": "Health Care",
+      "Profit_Chance": 14.31,
+      "Loss_Risk": 22.14
+    },
+    {
+      "Ticker": "BDX",
+      "Sector": "Health Care",
+      "Profit_Chance": 11.34,
+      "Loss_Risk": 18.8
+    },
+    {
+      "Ticker": "BMY",
+      "Sector": "Health Care",
+      "Profit_Chance": 16.11,
+      "Loss_Risk": 26.06
+    },
+    {
+      "Ticker": "T",
+      "Sector": "Communication Services",
+      "Profit_Chance": 14.52,
+      "Loss_Risk": 26.16
+    }
+  ]
+}
