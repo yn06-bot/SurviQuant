@@ -75,7 +75,7 @@ def evaluate_cindex(model: RandomSurvivalForest, X: pd.DataFrame, y) -> float:
 def save_model(model, path: str) -> None:
     with open(path, "wb") as f:
         pickle.dump(model, f)
-    print(f"  💾 모델 저장: {path}")
+    print(f" 모델 저장: {path}")
 
 
 def load_model(path: str):
@@ -84,7 +84,7 @@ def load_model(path: str):
 
 
 def main():
-    print("📚 데이터 로드 중...")
+    print(" 데이터 로드 중...")
     df = load_labeled_data()
 
     # 시계열 분할: 최근 20% → 검증
@@ -97,7 +97,7 @@ def main():
     X_val   = val_df[FEATURE_COLS]
 
     # ── 수익 모델
-    print("\n🌲 수익 모델 학습 중...")
+    print("\n 수익 모델 학습 중...")
     y_profit_train = build_structured_array(train_df["E_profit"], train_df["T_profit"])
     y_profit_val   = build_structured_array(val_df["E_profit"],   val_df["T_profit"])
     model_profit   = train_rsf(X_train, y_profit_train)
@@ -105,7 +105,7 @@ def main():
     print(f"  검증 C-index (수익): {cindex_profit:.4f}")
 
     # ── 손실 모델
-    print("\n🌲 손실 모델 학습 중...")
+    print("\n 손실 모델 학습 중...")
     y_loss_train = build_structured_array(train_df["E_loss"], train_df["T_loss"])
     y_loss_val   = build_structured_array(val_df["E_loss"],   val_df["T_loss"])
     model_loss   = train_rsf(X_train, y_loss_train)
@@ -126,10 +126,10 @@ def main():
         )
         drop = (old_cindex - new_cindex) / old_cindex
         if drop > ROLLBACK_THRESHOLD:
-            print(f"  🔄 롤백: {label} C-index {old_cindex:.4f}→{new_cindex:.4f} "
+            print(f" 롤백: {label} C-index {old_cindex:.4f}→{new_cindex:.4f} "
                   f"({drop:.1%} 하락, 임계 {ROLLBACK_THRESHOLD:.0%})")
             return False
-        print(f"  ✅ 모델 갱신: {label} C-index {old_cindex:.4f}→{new_cindex:.4f}")
+        print(f" 모델 갱신: {label} C-index {old_cindex:.4f}→{new_cindex:.4f}")
         return True
 
     if should_save(cindex_profit, profit_path, "profit"):
@@ -137,7 +137,7 @@ def main():
     if should_save(cindex_loss, loss_path, "loss"):
         save_model(model_loss, loss_path)
 
-    print("\n✅ 학습 파이프라인 완료")
+    print("\n 학습 파이프라인 완료")
 
 
 if __name__ == "__main__":
