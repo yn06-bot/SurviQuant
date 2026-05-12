@@ -2,7 +2,7 @@
 SurviQuant — 생존분석 기반 S&P500 AI 투자 대시보드
 ==========================================================
 실행: streamlit run dashboard.py
-데이터: ./data/scores.json, ./data/ohlcv_cache.parquet
+데이터: ./data/scores.json, ./data/ohlcv_cache.csv
 """
 
 import json
@@ -13,6 +13,9 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
+# ============================================================
+# 0. 페이지 설정
+# ============================================================
 st.set_page_config(
     page_title="SurviQuant | 생존분석 기반 AI 투자 대시보드",
     page_icon="📈",
@@ -22,6 +25,9 @@ st.set_page_config(
 
 DATA_DIR = Path(__file__).parent / "data"
 
+# ============================================================
+# 1. 데이터 로딩
+# ============================================================
 @st.cache_data(show_spinner="📡 AI Score 데이터 로딩 중...")
 def load_scores():
     with open(DATA_DIR / "scores.json", "r", encoding="utf-8") as f:
@@ -34,6 +40,9 @@ def load_ohlcv():
     df["Date"] = pd.to_datetime(df["Date"])
     return df
 
+# ============================================================
+# 2. 도메인 로직 (02_domain_scoring.md 최종 버전)
+# ============================================================
 PERSONA_PRESETS = {
     "conservative": {"label": "🛡 안정형", "w_profit": 0.31, "w_defense": 0.69, "lambda": 2.25, "desc": "손실 회피 우선 — Kahneman λ=2.25 그대로 적용"},
     "neutral":      {"label": "⚖ 중립형", "w_profit": 0.50, "w_defense": 0.50, "lambda": 1.00, "desc": "수익·방어 균형 (대시보드 기본값)"},
@@ -67,7 +76,68 @@ def classify_signal(score):
             return label, color
     return SIGNAL_RULES[-1][0], SIGNAL_RULES[-1][2]
 
-def build_chart(ticker_df, period_days):
+# ============================================================
+# 3. 인사이트 자동 생성 함수 (핵심 추가 기능)
+# ============================================================
+def generate_insights(rsi: float, adx: float, volatility: float,
+                      close: float, ma20: float) -> list[tuple[str, str, str]]:
+    """
+    기술지표 값 → 자동 인사이트 텍스트 생성.
+    Returns: [(icon, label, message), ...]
+    """
+    insights = []
+
+    # RSI 판단
+    if rsi >= 70:
+        insights.append(("⚠️", "RSI 과매수",
+                         f"RSI {rsi:.0f} — 단기 조정 가능성, 신규 진입 시 주의가 필요합니다."))
+    elif rsi <= 30:
+        insights.append(("✅", "RSI 과매도",
+                         f"RSI {rsi:.0f} — 반등 가능성 구간, 분할 매수를 고려해볼 수 있습니다."))
+    else:
+        insights.append(("🔵", "RSI 중립",
+                         f"RSI {rsi:.0f} — 과매수·과매도 아님, 추세 지속 가능한 구간입니다."))
+
+    # ADX 판단
+    if adx >= 40:
+        insights.append(("🔥", "강한 추세",
+                         f"ADX {adx:.0f} — 매우 강한 추세가 진행 중입니다."))
+    elif adx >= 25:
+        insights.append(("📈", "추세 존재",
+                         f"ADX {adx:.0f} — 방향성 추세가 확인됩니다."))
+    else:
+        insights.append(("😴", "횡보 구간",
+                         f"ADX {adx:.0f} — 뚜렷한 추세 없음, 관망을 고려하세요."))
+
+    # Volatility 판단
+    if volatility >= 0.4:
+        insights.append(("🌊", "고변동성",
+                         f"Volatility {volatility:.3f} — 가격 변동 폭이 매우 큽니다. 손절 라인을 설정하세요."))
+    elif volatility >= 0.2:
+        insights.append(("〰️", "중간 변동성",
+                         f"Volatility {volatility:.3f} — 보통 수준의 변동성입니다."))
+    else:
+        insights.append(("🧘", "저변동성",
+                         f"Volatility {volatility:.3f} — 안정적인 가격 흐름입니다."))
+
+    # MA20 대비 위치
+    gap_pct = (close - ma20) / ma20 * 100
+    if gap_pct > 5:
+        insights.append(("📗", "MA20 상회",
+                         f"종가가 MA20보다 {gap_pct:.1f}% 위 — 단기 상승 추세 유지 중입니다."))
+    elif gap_pct < -5:
+        insights.append(("📕", "MA20 하회",
+                         f"종가가 MA20보다 {abs(gap_pct):.1f}% 아래 — 단기 하락 압력이 있습니다."))
+    else:
+        insights.append(("📒", "MA20 근접",
+                         f"종가가 MA20과 {gap_pct:+.1f}% 차이 — 지지·저항 테스트 구간입니다."))
+
+    return insights
+
+# ============================================================
+# 4. 차트 생성
+# ============================================================
+def build_chart(ticker_df: pd.DataFrame, period_days: int) -> go.Figure:
     df = ticker_df.sort_values("Date").tail(period_days).copy()
     fig = make_subplots(rows=4, cols=1, shared_xaxes=True,
         row_heights=[0.52, 0.16, 0.16, 0.16], vertical_spacing=0.025,
@@ -101,6 +171,9 @@ def build_chart(ticker_df, period_days):
     fig.update_yaxes(title_text="변동성", row=4, col=1)
     return fig
 
+# ============================================================
+# 5. 사이드바
+# ============================================================
 meta, scores_df = load_scores()
 ohlcv_df = load_ohlcv()
 
@@ -118,26 +191,40 @@ with st.sidebar:
     st.caption(f"📅 기준일: **{meta['reference_date']}**")
     st.caption(f"⏱ Horizon: **{meta['horizon_days']}영업일**")
     st.caption(f"📊 C-index — Profit **{meta['model_performance_c_index']['profit_model']}** / Loss **{meta['model_performance_c_index']['loss_model']}**")
-    st.caption(f"🎯 분석 종목: **{meta['universe']['modeled_tickers']}개** (5섹터 대표주)")
+    st.caption(f"🎯 분석 종목: **약 200개** (5섹터 대표주)")
 
+# ============================================================
+# 6. AI Score 계산 + 정렬
+# ============================================================
 scores_df = scores_df.copy()
-scores_df["AI_Score"] = compute_ai_score(scores_df["Profit_Chance"], scores_df["Loss_Risk"], persona_key).round(2)
-scores_df[["Signal", "SignalColor"]] = scores_df["AI_Score"].apply(lambda s: pd.Series(classify_signal(s)))
+scores_df["AI_Score"] = compute_ai_score(
+    scores_df["Profit_Chance"], scores_df["Loss_Risk"], persona_key).round(2)
+scores_df[["Signal", "SignalColor"]] = scores_df["AI_Score"].apply(
+    lambda s: pd.Series(classify_signal(s)))
 scores_df = scores_df.sort_values("AI_Score", ascending=False).reset_index(drop=True)
 
+# ============================================================
+# 7. 헤더 + 탭
+# ============================================================
 st.title("📈 SurviQuant")
 st.markdown("**생존분석 기반 S&P 500 AI 투자 대시보드** — 단순 방향성이 아닌 *'도달 확률 + 시점'* 을 정량 제공")
 
 tab1, tab2, tab3 = st.tabs(["🏆 Today's Top Picks", "📊 종목 상세 차트", "ℹ️ About / 방법론"])
 
+# ============================================================
+# Tab 1 — Today's Top Picks
+# ============================================================
 with tab1:
     sector_options = ["전체"] + sorted(scores_df["Sector"].unique().tolist())
     col_filter, col_persona = st.columns([3, 1])
     with col_filter:
-        sel_sector = st.selectbox("🏭 섹터 필터", options=sector_options, help="섹터별로 Top10을 따로 보려면 선택하세요.")
+        sel_sector = st.selectbox("🏭 섹터 필터", options=sector_options,
+            help="섹터별로 Top10을 따로 보려면 선택하세요.")
     with col_persona:
         st.metric("선택된 성향", PERSONA_PRESETS[persona_key]["label"])
-    filtered = scores_df if sel_sector == "전체" else scores_df[scores_df["Sector"] == sel_sector].reset_index(drop=True)
+
+    filtered = (scores_df if sel_sector == "전체"
+                else scores_df[scores_df["Sector"] == sel_sector].reset_index(drop=True))
 
     st.markdown("#### 📍 시그널 분포")
     sig_counts = filtered["Signal"].value_counts()
@@ -145,7 +232,17 @@ with tab1:
     for i, (label, threshold, color) in enumerate(SIGNAL_RULES):
         with chip_cols[i]:
             count = int(sig_counts.get(label, 0))
-            st.markdown(f"""<div style="background:{color}15;border-left:5px solid {color};padding:14px 18px;border-radius:8px;min-height:88px;"><div style="font-size:13px;color:#555;font-weight:500;">{label}</div><div style="font-size:30px;font-weight:700;color:{color};line-height:1.2;">{count}<span style="font-size:14px;color:#999;font-weight:400;"> 종목</span></div><div style="font-size:11px;color:#999;">{"≥ " + str(threshold) + "점" if threshold > 0 else "< 40점"}</div></div>""", unsafe_allow_html=True)
+            st.markdown(
+                f"""<div style="background:{color}15;border-left:5px solid {color};
+                    padding:14px 18px;border-radius:8px;min-height:88px;">
+                    <div style="font-size:13px;color:#555;font-weight:500;">{label}</div>
+                    <div style="font-size:30px;font-weight:700;color:{color};line-height:1.2;">
+                        {count}<span style="font-size:14px;color:#999;font-weight:400;"> 종목</span>
+                    </div>
+                    <div style="font-size:11px;color:#999;">
+                        {"≥ " + str(threshold) + "점" if threshold > 0 else "< 40점"}
+                    </div></div>""",
+                unsafe_allow_html=True)
 
     st.divider()
     top_n = min(10, len(filtered))
@@ -163,7 +260,9 @@ with tab1:
             st.markdown(f"### {row['Ticker']}")
             st.caption(f"📂 {row['Sector']}")
         with cols[2]:
-            st.markdown(f"""<div style="margin-top:14px;"><span style="background:{color};color:white;padding:8px 18px;border-radius:22px;font-weight:600;font-size:14px;">{row['Signal']}</span></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div style="margin-top:14px;"><span style="background:{color};color:white;
+                padding:8px 18px;border-radius:22px;font-weight:600;font-size:14px;">
+                {row['Signal']}</span></div>""", unsafe_allow_html=True)
         with cols[3]:
             st.metric("AI Score", f"{row['AI_Score']:.1f}", help="0~100점. 성향별 가중치로 즉시 재계산됩니다.")
         with cols[4]:
@@ -176,59 +275,103 @@ with tab1:
         display_df = filtered[["Ticker", "Sector", "AI_Score", "Profit_Chance", "Loss_Risk", "Signal"]].copy()
         display_df.columns = ["티커", "섹터", "AI Score", "수익 확률(%)", "손실 확률(%)", "시그널"]
         st.dataframe(display_df, use_container_width=True, hide_index=True,
-            column_config={"AI Score": st.column_config.ProgressColumn("AI Score", min_value=0, max_value=100, format="%.1f"),
-                           "수익 확률(%)": st.column_config.NumberColumn(format="%.1f%%"),
-                           "손실 확률(%)": st.column_config.NumberColumn(format="%.1f%%")})
+            column_config={
+                "AI Score": st.column_config.ProgressColumn("AI Score", min_value=0, max_value=100, format="%.1f"),
+                "수익 확률(%)": st.column_config.NumberColumn(format="%.1f%%"),
+                "손실 확률(%)": st.column_config.NumberColumn(format="%.1f%%"),
+            })
 
+# ============================================================
+# Tab 2 — 종목 상세 차트 (인사이트 자동 생성 추가)
+# ============================================================
 with tab2:
     col_tick, col_period = st.columns([2, 2])
     with col_tick:
-        sel_ticker = st.selectbox("🔍 종목 선택", options=scores_df["Ticker"].tolist(), help="AI Score 내림차순 정렬")
+        sel_ticker = st.selectbox("🔍 종목 선택", options=scores_df["Ticker"].tolist(),
+            help="AI Score 내림차순 정렬")
     with col_period:
         sel_period_label = st.selectbox("📅 조회 기간", options=list(PERIOD_OPTIONS.keys()), index=1)
-    period_days = PERIOD_OPTIONS[sel_period_label]
-    row = scores_df[scores_df["Ticker"] == sel_ticker].iloc[0]
+
+    period_days  = PERIOD_OPTIONS[sel_period_label]
+    row          = scores_df[scores_df["Ticker"] == sel_ticker].iloc[0]
     ticker_ohlcv = ohlcv_df[ohlcv_df["Ticker"] == sel_ticker]
-    w = PERSONA_PRESETS[persona_key]
+    w            = PERSONA_PRESETS[persona_key]
+    latest       = ticker_ohlcv.sort_values("Date").iloc[-1]
+
     contrib_profit  = round(row["Profit_Chance"] * w["w_profit"], 2)
     contrib_defense = round((100 - row["Loss_Risk"]) * w["w_defense"], 2)
     ai_score        = round(contrib_profit + contrib_defense, 2)
     signal_label, signal_color = classify_signal(ai_score)
 
     st.markdown("---")
-    st.markdown(f"### {sel_ticker} &nbsp;<span style='background:{signal_color};color:white;padding:5px 16px;border-radius:20px;font-size:15px;font-weight:600;'>{signal_label}</span>", unsafe_allow_html=True)
+    st.markdown(
+        f"### {sel_ticker} &nbsp;"
+        f"<span style='background:{signal_color};color:white;padding:5px 16px;"
+        f"border-radius:20px;font-size:15px;font-weight:600;'>{signal_label}</span>",
+        unsafe_allow_html=True)
     st.caption(f"📂 {row['Sector']}  |  성향: {PERSONA_PRESETS[persona_key]['label']}")
 
+    # AI Score 카드
     c1, c2, c3 = st.columns(3)
     with c1:
         st.metric("🏆 AI Score", f"{ai_score:.1f} / 100", help="수익 기여 + 방어 기여의 합산 점수")
     with c2:
-        st.metric("📈 수익 기여", f"{contrib_profit:.1f}점", f"Profit {row['Profit_Chance']:.1f}% × {w['w_profit']:.2f}")
+        st.metric("📈 수익 기여", f"{contrib_profit:.1f}점",
+                  f"Profit {row['Profit_Chance']:.1f}% × {w['w_profit']:.2f}")
     with c3:
-        st.metric("🛡 방어 기여", f"{contrib_defense:.1f}점", f"Defense {100 - row['Loss_Risk']:.1f}% × {w['w_defense']:.2f}")
+        st.metric("🛡 방어 기여", f"{contrib_defense:.1f}점",
+                  f"Defense {100 - row['Loss_Risk']:.1f}% × {w['w_defense']:.2f}")
 
+    # AI Score 분해 막대
     fig_bar = go.Figure()
-    fig_bar.add_trace(go.Bar(x=[contrib_profit], y=["AI Score"], orientation="h", name="수익 기여",
-        marker_color="#10B981", text=[f"수익 기여 {contrib_profit:.1f}점"],
+    fig_bar.add_trace(go.Bar(x=[contrib_profit], y=["AI Score"], orientation="h",
+        name="수익 기여", marker_color="#10B981",
+        text=[f"수익 기여 {contrib_profit:.1f}점"],
         textposition="inside", textfont=dict(color="white", size=13)))
-    fig_bar.add_trace(go.Bar(x=[contrib_defense], y=["AI Score"], orientation="h", name="방어 기여",
-        marker_color="#3B82F6", text=[f"방어 기여 {contrib_defense:.1f}점"],
+    fig_bar.add_trace(go.Bar(x=[contrib_defense], y=["AI Score"], orientation="h",
+        name="방어 기여", marker_color="#3B82F6",
+        text=[f"방어 기여 {contrib_defense:.1f}점"],
         textposition="inside", textfont=dict(color="white", size=13)))
-    fig_bar.update_layout(barmode="stack", height=80, margin=dict(l=10, r=10, t=8, b=8),
+    fig_bar.update_layout(barmode="stack", height=80,
+        margin=dict(l=10, r=10, t=8, b=8),
         xaxis=dict(range=[0, 100], showticklabels=False, showgrid=False),
         yaxis=dict(showticklabels=False),
         legend=dict(orientation="h", y=1.6, x=0), template="plotly_white")
     st.plotly_chart(fig_bar, use_container_width=True)
 
+    # ── 자동 인사이트 (핵심 추가)
+    st.markdown("#### 💡 AI 인사이트 — 현재 지표 해석")
+    insights = generate_insights(
+        rsi=float(latest["RSI"]), adx=float(latest["ADX"]),
+        volatility=float(latest["Volatility"]),
+        close=float(latest["Close"]), ma20=float(latest["MA20"]),
+    )
+    insight_cols = st.columns(2)
+    for idx, (icon, label, message) in enumerate(insights):
+        with insight_cols[idx % 2]:
+            st.markdown(
+                f"""<div style="background:#F8FAFC;border-left:4px solid #3B82F6;
+                    padding:12px 16px;border-radius:8px;margin-bottom:10px;">
+                    <div style="font-size:13px;font-weight:600;color:#374151;">
+                        {icon} {label}
+                    </div>
+                    <div style="font-size:13px;color:#6B7280;margin-top:4px;">
+                        {message}
+                    </div></div>""",
+                unsafe_allow_html=True)
+
+    # 지표 설명 expander
     with st.expander("📖 차트 지표 설명 (클릭하면 펼쳐집니다)"):
         for desc in INDICATOR_HELP.values():
             st.markdown(f"- {desc}")
 
     st.markdown("---")
+
+    # 캔들 + 보조지표 차트
     fig_chart = build_chart(ticker_ohlcv, period_days)
     st.plotly_chart(fig_chart, use_container_width=True)
 
-    latest = ticker_ohlcv.sort_values("Date").iloc[-1]
+    # 최근 지표 스냅샷
     st.markdown("##### 📌 최근 지표 스냅샷")
     snap_cols = st.columns(5)
     for col, (label, value, tip) in zip(snap_cols, [
@@ -241,6 +384,9 @@ with tab2:
         with col:
             st.metric(label, value, help=tip)
 
+# ============================================================
+# Tab 3 — About / 방법론 (확장성 + 종목 수 수정)
+# ============================================================
 with tab3:
     st.markdown("## ℹ️ SurviQuant — 프로젝트 소개 및 방법론")
     st.divider()
@@ -285,21 +431,38 @@ AI Score = Profit_Chance × w_profit + (100 − Loss_Risk) × w_defense
     m1, m2 = st.columns(2)
     with m1:
         st.metric("수익 모델 C-index", "0.7087",
-                  help="C-index: 0.5=무작위, 1.0=완벽. 0.7 이상은 임상/금융 분야에서 실용적 수준으로 평가됩니다.")
+                  help="C-index: 0.5=무작위, 1.0=완벽. 0.7 이상은 임상·금융 분야에서 실용적 수준입니다.")
     with m2:
         st.metric("손실 모델 C-index", "0.7681",
-                  help="손실 모델이 수익 모델보다 높은 것은 Volatility(HR 5.28)의 강력한 손실 예측력 덕분입니다.")
+                  help="손실 모델이 더 높은 것은 Volatility(HR 5.28)의 강력한 손실 예측력 덕분입니다.")
     st.caption("모델: Random Survival Forest (RSF) | 검증: Kaplan-Meier + Cox PH | 핵심 변수: Volatility (수익 HR 2.87 / 손실 HR 5.28)")
+
+    st.divider()
+    st.markdown("### 🌐 확장 가능성")
+    st.success("""
+**SurviQuant는 모듈형 구조로 설계되어 다양한 자산군으로 확장 가능합니다.**
+
+- 코어 규칙(`01_core_rules.md`) 유지 + 도메인 규칙(`02_domain_scoring.md`) 교체만으로:
+  - 🇰🇷 **KOSPI / KOSDAQ** 국내 주식 적용 가능
+  - 📦 **ETF** (섹터 ETF, 채권 ETF 등) 적용 가능
+  - 📊 **개별 섹터 심화 분석** 모듈로 분리 가능
+- OHLCV 스키마와 생존분석 Event 정의만 유지하면 어떤 시계열 금융 데이터도 처리 가능
+    """)
 
     st.divider()
     st.markdown("### ⚠️ 데이터 범위 및 한계")
     st.warning("""
 **현재 버전의 분석 대상은 50종목으로 제한됩니다.**
 
-- 분석 기간: 2024.04 ~ 2026.04 (약 502영업일)  
-- 대상: S&P 500 5개 섹터 대표 50종목  
-- EDA·생존 레코드: 223종목 전체 활용 / RSF 학습·추론: 50종목  
-- 거시 지표: 10년물 미국채 수익률(TNX) 통합  
+- 분석 기간: 2024.04 ~ 2026.04 (약 502영업일)
+- 대상: S&P 500 5개 섹터 대표 50종목 (전체 생존 레코드는 약 200개 종목 활용)
+- 거시 지표: 10년물 미국채 수익률(TNX) — 시장 금리 환경을 모델에 반영한 거시지표
 
 본 도구는 **참고용 정량 지표**이며, 투자 권유 또는 자문이 아닙니다.
     """)
+
+# ============================================================
+# 8. 푸터
+# ============================================================
+st.divider()
+st.caption("ℹ️ 본 대시보드는 학술·시연 목적으로 제작되었습니다. 투자 권유 또는 자문이 아닙니다.")
