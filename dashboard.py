@@ -191,7 +191,7 @@ with st.sidebar:
     st.caption(f"📅 기준일: **{meta['reference_date']}**")
     st.caption(f"⏱ Horizon: **{meta['horizon_days']}영업일**")
     st.caption(f"📊 C-index — Profit **{meta['model_performance_c_index']['profit_model']}** / Loss **{meta['model_performance_c_index']['loss_model']}**")
-    st.caption(f"🎯 분석 종목: **약 200개** (5섹터 대표주)")
+    st.caption(f"🎯 분석 종목: **약 50개** (5섹터 대표주)")
 
 # ============================================================
 # 6. AI Score 계산 + 정렬
