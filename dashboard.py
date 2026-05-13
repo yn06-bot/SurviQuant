@@ -541,7 +541,7 @@ with ctrl2:
     )
     # [수정 7] help= 물음표 제거
     sel_ticker = st.selectbox(
-        "종목 선택 (AI Score 내림차순)",
+        "종목 선택",
         options=ticker_options,
     )
 with ctrl3:
