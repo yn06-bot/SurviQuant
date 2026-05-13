@@ -11,7 +11,7 @@ Skills 참조: 01_core_rules.md § 1 (데이터 스키마 및 전처리 원칙)
 """
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pandas as pd
 import yfinance as yf
@@ -27,7 +27,7 @@ SECTOR_TICKERS = {
     "Health Care": [
         "LLY", "UNH", "JNJ", "MRK", "ABBV", "ABT", "TMO", "DHR",
         "AMGN", "ISRG", "SYK", "BSX", "MDT", "EW", "ZBH", "BAX",
-        "BDX", "IQV", "IQVIA", "A", "MTD", "WAT", "HOLX", "PODD",
+        "BDX", "IQV", "A", "MTD", "WAT", "HOLX", "PODD",
         "INSP", "ALGN", "DXCM", "RMD", "IDXX", "MRNA",
     ],
     "Financials": [
@@ -51,28 +51,39 @@ SECTOR_TICKERS = {
 }
 
 START_DATE = "2010-01-01"
-DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
+DATA_DIR   = os.path.join(os.path.dirname(__file__), "..", "data")
 CACHE_PATH = os.path.join(DATA_DIR, "ohlcv_cache.csv")
-MISSING_THRESHOLD = 0.05   # 결측치 5% 초과 시 Alert
+MISSING_THRESHOLD = 0.05
+
+
+def _flatten_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    최신 yfinance가 반환하는 MultiIndex 컬럼을 단일 레벨로 평탄화.
+    예: ('Close', 'AAPL') → 'Close'
+    """
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    return df
 
 
 def fetch_tnx(start: str, end: str) -> pd.DataFrame:
     """10년물 미국채 수익률(^TNX) 수집."""
     tnx = yf.download("^TNX", start=start, end=end, progress=False, auto_adjust=True)
+    tnx = _flatten_columns(tnx)          # ← MultiIndex 평탄화
     tnx = tnx[["Close"]].rename(columns={"Close": "TNX"})
     tnx.index = pd.to_datetime(tnx.index)
     tnx.index.name = "Date"
     return tnx
 
 
-def fetch_ohlcv(ticker: str, sector: str, start: str, end: str) -> pd.DataFrame | None:
+def fetch_ohlcv(ticker: str, sector: str, start: str, end: str):
     """단일 종목 OHLCV 수집 및 기본 전처리."""
     try:
         df = yf.download(ticker, start=start, end=end, progress=False, auto_adjust=True)
         if df.empty or len(df) < 60:
             return None
+        df = _flatten_columns(df)         # ← MultiIndex 평탄화
         df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
-        df.columns = ["Open", "High", "Low", "Close", "Volume"]
         df.index = pd.to_datetime(df.index)
         df.index.name = "Date"
         df["Ticker"] = ticker
@@ -111,7 +122,6 @@ def main():
             print(f"  [{count}/{total}] {ticker} ({sector})")
             df = fetch_ohlcv(ticker, sector, START_DATE, end_date)
             if df is not None:
-                # TNX 병합 (날짜 기준 left join, NaN은 forward fill)
                 df = df.join(tnx_df, how="left")
                 df["TNX"] = df["TNX"].ffill()
                 check_missing(df, ticker)
