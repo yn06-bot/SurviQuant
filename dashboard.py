@@ -277,17 +277,30 @@ def build_forecast_chart(ticker: str, ticker_ohlcv: pd.DataFrame,
     # ④ +10% / -10% 기준선
     profit_line = mc_start_price * 1.10
     loss_line   = mc_start_price * 0.90
-    fig.add_hline(y=profit_line, line_dash="dash", line_color="#10B981",
-                  opacity=0.7, annotation_text=f"+10% (${profit_line:.1f})",
-                  annotation_position="right")
-    fig.add_hline(y=loss_line, line_dash="dash", line_color="#EF4444",
-                  opacity=0.7, annotation_text=f"-10% (${loss_line:.1f})",
-                  annotation_position="right")
+    fig.add_shape(type="line", x0=0, x1=1, xref="paper",
+        y0=profit_line, y1=profit_line, yref="y",
+        line=dict(color="#10B981", width=1.5, dash="dash"))
+    fig.add_annotation(x=1, y=profit_line, xref="paper", yref="y",
+        text=f"+10% (${profit_line:.1f})", showarrow=False,
+        font=dict(color="#10B981", size=11), xanchor="left")
 
-    # ⑤ 현재/예측 경계선
-    fig.add_vline(x=str(base_date)[:10], line_dash="dot",
-                  line_color="#F59E0B", opacity=0.8,
-                  annotation_text="예측 시작", annotation_position="top")
+    fig.add_shape(type="line", x0=0, x1=1, xref="paper",
+        y0=loss_line, y1=loss_line, yref="y",
+        line=dict(color="#EF4444", width=1.5, dash="dash"))
+    fig.add_annotation(x=1, y=loss_line, xref="paper", yref="y",
+        text=f"-10% (${loss_line:.1f})", showarrow=False,
+        font=dict(color="#EF4444", size=11), xanchor="left")
+
+    # ⑤ 현재/예측 경계선 (plotly 6.x 호환 방식)
+    fig.add_shape(type="line",
+        x0=str(base_date)[:10], x1=str(base_date)[:10],
+        y0=0, y1=1, xref="x", yref="paper",
+        line=dict(color="#F59E0B", width=1.5, dash="dot"))
+    fig.add_annotation(
+        x=str(base_date)[:10], y=1, xref="x", yref="paper",
+        text="예측 시작", showarrow=False,
+        font=dict(color="#F59E0B", size=11),
+        xanchor="left", yanchor="top", bgcolor="white", opacity=0.8)
 
     fig.update_layout(
         height=480, margin=dict(l=10, r=80, t=30, b=10),
