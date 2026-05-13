@@ -12,8 +12,13 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-import yfinance as yf
 from plotly.subplots import make_subplots
+
+try:
+    import yfinance as yf
+    YF_AVAILABLE = True
+except ImportError:
+    YF_AVAILABLE = False
 
 # ============================================================
 # 0. 페이지 설정
@@ -157,8 +162,10 @@ def generate_insights(rsi: float, adx: float, volatility: float,
 def fetch_recent_prices(ticker: str, last_cache_date: str) -> pd.DataFrame:
     """
     ohlcv_cache.csv의 마지막 날짜 이후부터 오늘까지의 실제 주가를 yfinance로 fetch.
-    차트 연결용으로만 사용 (회사정보 API 호출 없음).
+    yfinance 미설치 환경에서는 빈 DataFrame 반환 (몬테카를로는 캐시 기반으로 동작).
     """
+    if not YF_AVAILABLE:
+        return pd.DataFrame()
     try:
         start = pd.to_datetime(last_cache_date) + pd.Timedelta(days=1)
         df = yf.download(ticker, start=start.strftime("%Y-%m-%d"),
@@ -587,11 +594,19 @@ with tab2:
 
     # ── 몬테카를로 미래 예측 차트
     st.markdown("#### 🔮 미래 가격 시나리오 — 몬테카를로 시뮬레이션 (20영업일)")
-    st.caption(
-        "GBM(기하 브라운 운동) 기반 500개 경로 시뮬레이션. "
-        "회색: 캐시 과거 데이터 / 컬러 캔들: 오늘까지 실제 가격 / 보라 밴드: 향후 20영업일 예측 시나리오. "
-        "**참고용 통계 시나리오이며 실제 수익을 보장하지 않습니다.**"
-    )
+    if YF_AVAILABLE:
+        st.caption(
+            "GBM(기하 브라운 운동) 기반 500개 경로 시뮬레이션. "
+            "회색: 캐시 과거 데이터 / 컬러 캔들: 오늘까지 실제 가격 / 보라 밴드: 향후 20영업일 예측 시나리오. "
+            "**참고용 통계 시나리오이며 실제 수익을 보장하지 않습니다.**"
+        )
+    else:
+        st.caption(
+            "GBM(기하 브라운 운동) 기반 500개 경로 시뮬레이션. "
+            "회색: 캐시 과거 데이터 / 보라 밴드: 향후 20영업일 예측 시나리오. "
+            "*(최신 실제 데이터는 환경 설정 후 활성화됩니다)* "
+            "**참고용 통계 시나리오이며 실제 수익을 보장하지 않습니다.**"
+        )
     fig_mc = build_forecast_chart(
         ticker=sel_ticker,
         ticker_ohlcv=ticker_ohlcv,
