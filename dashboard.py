@@ -63,7 +63,30 @@ h4 {
     font-size: 18px !important;
 }
 
-/* ── caption 더 진하게 ── */
+/* ── ⓘ 팝오버 버튼 → 원형 아이콘 뱃지 ── */
+button[data-testid="stPopoverButton"] {
+    background: transparent !important;
+    border: 1.5px solid #94A3B8 !important;
+    border-radius: 50% !important;
+    min-height: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    width: 26px !important;
+    padding: 0px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #64748B !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.15s ease !important;
+}
+button[data-testid="stPopoverButton"]:hover {
+    border-color: #3B82F6 !important;
+    color: #3B82F6 !important;
+    background: rgba(59,130,246,0.07) !important;
+}
 [data-testid="stCaptionContainer"] p {
     font-size: 12px !important;
     color: #4B5563 !important;
@@ -487,15 +510,15 @@ scores_df = scores_df.sort_values("AI_Score", ascending=False).reset_index(drop=
 # ============================================================
 # 8. 헤더
 # ============================================================
-title_col, info_col = st.columns([11, 1])
-with title_col:
-    st.title("📈 SurviQuant")
-    # [수정 2] 서브타이틀: caption → 진하고 큰 텍스트
+st.title("📈 SurviQuant")
+
+_sub_col, _btn_col = st.columns([11, 1])
+with _sub_col:
     st.markdown(
         "<p class='sq-subtitle'>생존분석 기반 S&amp;P 500 AI 투자 대시보드</p>",
         unsafe_allow_html=True,
     )
-with info_col:
+with _btn_col:
     with st.popover("ⓘ", use_container_width=True):
         st.markdown("### SurviQuant 방법론")
         st.divider()
@@ -523,7 +546,7 @@ SurviQuant는 **'언제 도달하는가'** 라는 시간 차원을 함께 예측
 
         st.markdown("**AI Score 공식**")
         st.code(
-            "AI Score = Profit_Chance × w_profit"
+            "AI Score = Profit_Chance × w_profit\n"
             "         + (100 − Loss_Risk) × w_defense",
             language="python")
         st.markdown("수익 동력과 하방 방어를 동시에 반영해 단순 확률보다 실용적인 지표를 제공합니다.")
