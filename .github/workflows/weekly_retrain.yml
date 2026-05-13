@@ -2,7 +2,7 @@ name: Weekly Model Retrain
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # 매주 일요일 자정 실행
+    - cron: '0 0 * * 0'   # 매주 일요일 자정 실행
   workflow_dispatch:
 
 jobs:
@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 저장소 체크아웃
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4          # v3 → v4 (Node.js 24 대응)
 
       - name: Python 환경 설정
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5      # v4 → v5 (Node.js 24 대응)
         with:
           python-version: '3.10'
 
       - name: 패키지 설치
-        run: pip install -r requirements.txt
+        run: pip install -r requirements-dev.txt
 
       - name: Random Survival Forest 모델 파라미터 재학습
         run: python src/models.py
