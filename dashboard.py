@@ -8,9 +8,11 @@ SurviQuant — 생존분석 기반 S&P500 AI 투자 대시보드
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+import yfinance as yf
 from plotly.subplots import make_subplots
 
 # ============================================================
@@ -149,8 +151,145 @@ def generate_insights(rsi: float, adx: float, volatility: float,
     return insights
 
 # ============================================================
-# 4. 차트 생성
+# 4-A. 최신 가격 fetch (ohlcv_cache 이후 ~ 오늘)
 # ============================================================
+@st.cache_data(ttl=3600, show_spinner="📡 최신 주가 데이터 가져오는 중...")
+def fetch_recent_prices(ticker: str, last_cache_date: str) -> pd.DataFrame:
+    """
+    ohlcv_cache.csv의 마지막 날짜 이후부터 오늘까지의 실제 주가를 yfinance로 fetch.
+    차트 연결용으로만 사용 (회사정보 API 호출 없음).
+    """
+    try:
+        start = pd.to_datetime(last_cache_date) + pd.Timedelta(days=1)
+        df = yf.download(ticker, start=start.strftime("%Y-%m-%d"),
+                         progress=False, auto_adjust=True)
+        if df.empty:
+            return pd.DataFrame()
+        df = df.reset_index()
+        df.columns = [c[0] if isinstance(c, tuple) else c for c in df.columns]
+        df = df.rename(columns={"Date": "Date", "Open": "Open", "High": "High",
+                                  "Low": "Low", "Close": "Close", "Volume": "Volume"})
+        df["Ticker"] = ticker
+        return df[["Date", "Open", "High", "Low", "Close", "Volume", "Ticker"]]
+    except Exception:
+        return pd.DataFrame()
+
+# ============================================================
+# 4-B. 몬테카를로 시뮬레이션 (향후 20영업일)
+# ============================================================
+def run_monte_carlo(last_close: float, volatility: float,
+                    n_days: int = 20, n_sim: int = 500, seed: int = 42) -> dict:
+    """
+    GBM(기하 브라운 운동) 기반 몬테카를로 시뮬레이션.
+    volatility: 20일 log-return std (ohlcv_cache Volatility 컬럼값)
+    Returns: dict of percentile arrays (shape: n_days+1)
+    """
+    rng = np.random.default_rng(seed)
+    dt = 1
+    # 일간 변동성으로 환산 (20일 vol → 1일 vol)
+    daily_vol = volatility / np.sqrt(20)
+    # drift = 0 (보수적 중립 가정)
+    paths = np.zeros((n_sim, n_days + 1))
+    paths[:, 0] = last_close
+    z = rng.standard_normal((n_sim, n_days))
+    for t in range(1, n_days + 1):
+        paths[:, t] = paths[:, t-1] * np.exp(-0.5 * daily_vol**2 * dt
+                                               + daily_vol * np.sqrt(dt) * z[:, t-1])
+    return {
+        "p05":    np.percentile(paths, 5,  axis=0),
+        "p25":    np.percentile(paths, 25, axis=0),
+        "p50":    np.percentile(paths, 50, axis=0),
+        "p75":    np.percentile(paths, 75, axis=0),
+        "p95":    np.percentile(paths, 95, axis=0),
+        "paths":  paths,
+    }
+
+# ============================================================
+# 4-C. 통합 예측 차트 (과거 캔들 + 최신 실제 + 미래 몬테카를로)
+# ============================================================
+def build_forecast_chart(ticker: str, ticker_ohlcv: pd.DataFrame,
+                         volatility: float, display_days: int = 60) -> go.Figure:
+    """
+    [과거 캔들] + [최신 실제 가격] + [몬테카를로 미래 예측 밴드] 통합 차트.
+    """
+    hist = ticker_ohlcv.sort_values("Date").tail(display_days).copy()
+    last_date  = hist["Date"].iloc[-1]
+    last_close = float(hist["Close"].iloc[-1])
+
+    # 최신 실제 데이터 fetch
+    recent = fetch_recent_prices(ticker, last_date.strftime("%Y-%m-%d"))
+
+    # 미래 날짜 축 생성 (영업일 기준)
+    base_date = recent["Date"].iloc[-1] if not recent.empty else last_date
+    future_dates = pd.bdate_range(start=base_date + pd.Timedelta(days=1), periods=20)
+
+    # 몬테카를로 실행
+    mc_start_price = float(recent["Close"].iloc[-1]) if not recent.empty else last_close
+    mc = run_monte_carlo(mc_start_price, volatility)
+    mc_dates = [base_date] + list(future_dates)  # t=0 포함
+
+    fig = go.Figure()
+
+    # ① 과거 캔들 (캐시 데이터)
+    fig.add_trace(go.Candlestick(
+        x=hist["Date"], open=hist["Open"], high=hist["High"],
+        low=hist["Low"], close=hist["Close"],
+        name="과거 (캐시)", increasing_line_color="#6B7280",
+        decreasing_line_color="#9CA3AF", opacity=0.7))
+
+    # ② 최신 실제 가격 (yfinance, 캔들)
+    if not recent.empty:
+        fig.add_trace(go.Candlestick(
+            x=recent["Date"], open=recent["Open"], high=recent["High"],
+            low=recent["Low"], close=recent["Close"],
+            name="최신 실제가", increasing_line_color="#10B981",
+            decreasing_line_color="#EF4444"))
+
+    # ③ 몬테카를로 밴드 (5~95%, 25~75%, 중앙값)
+    fig.add_trace(go.Scatter(
+        x=mc_dates, y=mc["p95"], name="95th",
+        line=dict(color="rgba(99,102,241,0)", width=0),
+        showlegend=False, hoverinfo="skip"))
+    fig.add_trace(go.Scatter(
+        x=mc_dates, y=mc["p05"], name="5~95% 구간",
+        fill="tonexty", fillcolor="rgba(99,102,241,0.10)",
+        line=dict(color="rgba(99,102,241,0)", width=0)))
+    fig.add_trace(go.Scatter(
+        x=mc_dates, y=mc["p75"], name="75th",
+        line=dict(color="rgba(99,102,241,0)", width=0),
+        showlegend=False, hoverinfo="skip"))
+    fig.add_trace(go.Scatter(
+        x=mc_dates, y=mc["p25"], name="25~75% 구간",
+        fill="tonexty", fillcolor="rgba(99,102,241,0.20)",
+        line=dict(color="rgba(99,102,241,0)", width=0)))
+    fig.add_trace(go.Scatter(
+        x=mc_dates, y=mc["p50"], name="중앙값 (50th)",
+        line=dict(color="#6366F1", width=2.5, dash="dot"),
+        hovertemplate="중앙값: $%{y:.2f}<extra></extra>"))
+
+    # ④ +10% / -10% 기준선
+    profit_line = mc_start_price * 1.10
+    loss_line   = mc_start_price * 0.90
+    fig.add_hline(y=profit_line, line_dash="dash", line_color="#10B981",
+                  opacity=0.7, annotation_text=f"+10% (${profit_line:.1f})",
+                  annotation_position="right")
+    fig.add_hline(y=loss_line, line_dash="dash", line_color="#EF4444",
+                  opacity=0.7, annotation_text=f"-10% (${loss_line:.1f})",
+                  annotation_position="right")
+
+    # ⑤ 현재/예측 경계선
+    fig.add_vline(x=str(base_date)[:10], line_dash="dot",
+                  line_color="#F59E0B", opacity=0.8,
+                  annotation_text="예측 시작", annotation_position="top")
+
+    fig.update_layout(
+        height=480, margin=dict(l=10, r=80, t=30, b=10),
+        xaxis_rangeslider_visible=False, template="plotly_white",
+        legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="right", x=1),
+        title=dict(text=f"{ticker} — 과거·실제·예측 통합 차트 (몬테카를로 500경로)", font_size=14))
+    return fig
+
+
 def build_chart(ticker_df: pd.DataFrame, period_days: int) -> go.Figure:
     df = ticker_df.sort_values("Date").tail(period_days).copy()
     fig = make_subplots(rows=4, cols=1, shared_xaxes=True,
@@ -378,7 +517,6 @@ with tab2:
     st.markdown("#### 📉 생존분석 — 수익·손실 도달 확률 추이 (20영업일)")
     st.caption("RSF 모델의 t=20 종점 확률을 지수분포로 역산한 근사 곡선입니다. 실제 도달 시점의 분포를 직관적으로 보여줍니다.")
 
-    import numpy as np
     days = np.arange(1, 21)
     p_profit = row["Profit_Chance"] / 100
     p_loss   = row["Loss_Risk"] / 100
@@ -447,6 +585,25 @@ with tab2:
 
     st.markdown("---")
 
+    # ── 몬테카를로 미래 예측 차트
+    st.markdown("#### 🔮 미래 가격 시나리오 — 몬테카를로 시뮬레이션 (20영업일)")
+    st.caption(
+        "GBM(기하 브라운 운동) 기반 500개 경로 시뮬레이션. "
+        "회색: 캐시 과거 데이터 / 컬러 캔들: 오늘까지 실제 가격 / 보라 밴드: 향후 20영업일 예측 시나리오. "
+        "**참고용 통계 시나리오이며 실제 수익을 보장하지 않습니다.**"
+    )
+    fig_mc = build_forecast_chart(
+        ticker=sel_ticker,
+        ticker_ohlcv=ticker_ohlcv,
+        volatility=float(latest["Volatility"]),
+        display_days=60,
+    )
+    st.plotly_chart(fig_mc, use_container_width=True)
+
+    st.markdown("---")
+
+    # 캔들 + 보조지표 차트
+    st.markdown("#### 📊 기술지표 차트")
     fig_chart = build_chart(ticker_ohlcv, period_days)
     st.plotly_chart(fig_chart, use_container_width=True)
 
