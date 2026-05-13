@@ -380,12 +380,58 @@ scores_df[["Signal", "SignalColor"]] = scores_df["AI_Score"].apply(
 scores_df = scores_df.sort_values("AI_Score", ascending=False).reset_index(drop=True)
 
 # ============================================================
-# 7. 헤더 + 탭
+# 7. 헤더 + FAQ 팝업 + 탭
 # ============================================================
-st.title("📈 SurviQuant")
-st.markdown("**생존분석 기반 S&P 500 AI 투자 대시보드** — 단순 방향성이 아닌 *'도달 확률 + 시점'* 을 정량 제공")
+title_col, info_col = st.columns([11, 1])
+with title_col:
+    st.title("📈 SurviQuant")
+    st.markdown("**생존분석 기반 S&P 500 AI 투자 대시보드** — 단순 방향성이 아닌 *'도달 확률 + 시점'* 을 정량 제공")
+with info_col:
+    with st.popover("ℹ️", use_container_width=True):
+        st.markdown("### 📖 SurviQuant 방법론 FAQ")
+        st.divider()
+        st.markdown("**Q. 왜 생존분석인가?**")
+        st.markdown("""
+일반적인 모델은 방향성(상승/하락)만 예측합니다.
+SurviQuant는 **'언제 도달하는가'** 를 함께 예측합니다.
+- 수익 사건: 매수 시점 대비 **+10% 도달**까지의 시간
+- 손실 사건: 매수 시점 대비 **−10% 도달**까지의 시간
+- 예측 Horizon: 고정 **20영업일**
+        """)
+        st.divider()
+        st.markdown("**Q. 데이터 범위는?**")
+        st.markdown("""
+- 학습 기간: **2010.01 ~ 2026.04 (약 16년)**
+- 생존분석 레코드: **853,504건**
+- EDA 대상: S&P 500 **223개** 종목
+- RSF 추론 대상: **50개** (5섹터 대표주)
+        """)
+        st.divider()
+        st.markdown("**Q. AI Score는 왜 이 공식인가?**")
+        st.code("AI Score = Profit_Chance × w_profit + (100−Loss_Risk) × w_defense", language="python")
+        st.markdown("수익 동력과 하방 방어를 동시에 반영해 단순 확률보다 실용적인 지표를 제공합니다.")
+        st.divider()
+        st.markdown("**Q. 가중치 설정 근거는?**")
+        st.markdown("""
+**Tversky & Kahneman (1992)** Prospect Theory 손실 회피 계수 **λ ≈ 2.25**
+- 안정형: 31/69 (λ=2.25) — 손실 최소화 우선
+- 중립형: 50/50 (λ=1.0) — 균형
+- 공격형: 69/31 (λ=0.44) — 고수익 추구
+        """)
+        st.divider()
+        st.markdown("**Q. 확장 가능성은?**")
+        st.success("코어 규칙 유지 + 도메인 규칙 교체만으로 KOSPI / ETF / 섹터 심화 분석 모두 적용 가능한 모듈형 구조입니다.")
+        st.divider()
+        st.markdown("**Q. 모델 성능은?**")
+        mc1, mc2 = st.columns(2)
+        with mc1:
+            st.metric("수익 C-index", "0.7087")
+        with mc2:
+            st.metric("손실 C-index", "0.7681")
+        st.caption("C-index 0.7 이상 = 임상·금융 분야 실용 수준. 핵심 변수: Volatility (HR 수익 2.87 / 손실 5.28)")
+        st.caption("⚠️ 본 도구는 참고용 정량 지표이며 투자 권유가 아닙니다.")
 
-tab1, tab2, tab3 = st.tabs(["🏆 Today's Top Picks", "📊 종목 상세 차트", "ℹ️ About / 방법론"])
+tab1, tab2 = st.tabs(["🏆 Today's Top Picks", "📊 종목 상세 분석"])
 
 # ============================================================
 # Tab 1 — Today's Top Picks
@@ -458,15 +504,19 @@ with tab1:
             })
 
 # ============================================================
-# Tab 2 — 종목 상세 차트
+# Tab 2 — 종목 상세 분석 (2컬럼: 분석 | 차트)
 # ============================================================
 with tab2:
-    col_tick, col_period = st.columns([2, 2])
-    with col_tick:
+    # 상단 컨트롤
+    ctrl1, ctrl2, ctrl3 = st.columns([2, 2, 1])
+    with ctrl1:
         sel_ticker = st.selectbox("🔍 종목 선택", options=scores_df["Ticker"].tolist(),
             help="AI Score 내림차순 정렬")
-    with col_period:
+    with ctrl2:
         sel_period_label = st.selectbox("📅 조회 기간", options=list(PERIOD_OPTIONS.keys()), index=1)
+    with ctrl3:
+        sel_sector_detail = st.selectbox("🏭 섹터",
+            options=["전체"] + sorted(scores_df["Sector"].unique().tolist()), index=0)
 
     period_days  = PERIOD_OPTIONS[sel_period_label]
     row          = scores_df[scores_df["Ticker"] == sel_ticker].iloc[0]
@@ -479,254 +529,253 @@ with tab2:
     ai_score        = round(contrib_profit + contrib_defense, 2)
     signal_label, signal_color = classify_signal(ai_score)
 
-    st.markdown("---")
+    # 종목 헤더
     st.markdown(
         f"### {sel_ticker} &nbsp;"
         f"<span style='background:{signal_color};color:white;padding:5px 16px;"
         f"border-radius:20px;font-size:15px;font-weight:600;'>{signal_label}</span>",
         unsafe_allow_html=True)
     st.caption(f"📂 {row['Sector']}  |  성향: {PERSONA_PRESETS[persona_key]['label']}")
+    st.divider()
 
-    # ── 기업 정보 카드 (정적 JSON에서 로드)
-    company = get_company_info(sel_ticker, company_db)
-    with st.expander(f"🏢 {company['name']} — 기업 개요 (클릭하면 펼쳐집니다)", expanded=False):
-        col_info1, col_info2 = st.columns([2, 1])
-        with col_info1:
+    # ── 2컬럼 메인 레이아웃
+    col_left, col_right = st.columns([1, 1.6])
+
+    # ════════════════════════════════
+    # 왼쪽: 분석 패널
+    # ════════════════════════════════
+    with col_left:
+
+        # 기업 개요
+        company = get_company_info(sel_ticker, company_db)
+        with st.expander(f"🏢 {company['name']} — 기업 개요", expanded=False):
             st.markdown(f"**{company['name']}** ({sel_ticker})")
             if company["industry"]:
                 st.caption(f"업종: {company['industry']}")
             st.markdown(company["summary"])
             if company["website"]:
                 st.markdown(f"🔗 [공식 웹사이트]({company['website']})")
-        with col_info2:
-            if company["market_cap"]:
-                cap_b = company["market_cap"] / 1e9
-                st.metric("시가총액", f"${cap_b:,.1f}B")
-            if company["employees"]:
-                st.metric("임직원 수", f"{company['employees']:,}명")
+            info_c1, info_c2 = st.columns(2)
+            with info_c1:
+                if company["market_cap"]:
+                    st.metric("시가총액", f"${company['market_cap']/1e9:,.1f}B")
+            with info_c2:
+                if company["employees"]:
+                    st.metric("임직원 수", f"{company['employees']:,}명")
 
-    # AI Score 카드
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.metric("🏆 AI Score", f"{ai_score:.1f} / 100", help="수익 기여 + 방어 기여의 합산 점수")
-    with c2:
-        st.metric("📈 수익 기여", f"{contrib_profit:.1f}점",
-                  f"Profit {row['Profit_Chance']:.1f}% × {w['w_profit']:.2f}")
-    with c3:
-        st.metric("🛡 방어 기여", f"{contrib_defense:.1f}점",
-                  f"Defense {100 - row['Loss_Risk']:.1f}% × {w['w_defense']:.2f}")
+        st.markdown("#### 🏆 AI Score")
 
-    # AI Score 분해 막대
-    fig_bar = go.Figure()
-    fig_bar.add_trace(go.Bar(x=[contrib_profit], y=["AI Score"], orientation="h",
-        name="수익 기여", marker_color="#10B981",
-        text=[f"수익 기여 {contrib_profit:.1f}점"],
-        textposition="inside", textfont=dict(color="white", size=13)))
-    fig_bar.add_trace(go.Bar(x=[contrib_defense], y=["AI Score"], orientation="h",
-        name="방어 기여", marker_color="#3B82F6",
-        text=[f"방어 기여 {contrib_defense:.1f}점"],
-        textposition="inside", textfont=dict(color="white", size=13)))
-    fig_bar.update_layout(barmode="stack", height=80,
-        margin=dict(l=10, r=10, t=8, b=8),
-        xaxis=dict(range=[0, 100], showticklabels=False, showgrid=False),
-        yaxis=dict(showticklabels=False),
-        legend=dict(orientation="h", y=1.6, x=0), template="plotly_white")
-    st.plotly_chart(fig_bar, use_container_width=True)
+        # AI Score 카드
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.metric("AI Score", f"{ai_score:.1f}", help="수익 기여 + 방어 기여의 합산 (0~100점)")
+        with c2:
+            st.metric("📈 수익 기여", f"{contrib_profit:.1f}점",
+                      f"Profit {row['Profit_Chance']:.1f}% × {w['w_profit']:.2f}")
+        with c3:
+            st.metric("🛡 방어 기여", f"{contrib_defense:.1f}점",
+                      f"Defense {100-row['Loss_Risk']:.1f}% × {w['w_defense']:.2f}")
 
-    # ── 생존 곡선 (지수분포 근사)
-    st.markdown("#### 📉 생존분석 — 수익·손실 도달 확률 추이 (20영업일)")
-    st.caption("RSF 모델의 t=20 종점 확률을 지수분포로 역산한 근사 곡선입니다. 실제 도달 시점의 분포를 직관적으로 보여줍니다.")
+        # AI Score 분해 막대
+        fig_bar = go.Figure()
+        fig_bar.add_trace(go.Bar(x=[contrib_profit], y=["AI Score"], orientation="h",
+            name="수익 기여", marker_color="#10B981",
+            text=[f"수익 기여 {contrib_profit:.1f}점"],
+            textposition="inside", textfont=dict(color="white", size=12)))
+        fig_bar.add_trace(go.Bar(x=[contrib_defense], y=["AI Score"], orientation="h",
+            name="방어 기여", marker_color="#3B82F6",
+            text=[f"방어 기여 {contrib_defense:.1f}점"],
+            textposition="inside", textfont=dict(color="white", size=12)))
+        fig_bar.update_layout(barmode="stack", height=72,
+            margin=dict(l=0, r=0, t=4, b=4),
+            xaxis=dict(range=[0, 100], showticklabels=False, showgrid=False),
+            yaxis=dict(showticklabels=False),
+            legend=dict(orientation="h", y=1.8, x=0), template="plotly_white")
+        st.plotly_chart(fig_bar, use_container_width=True)
 
-    days = np.arange(1, 21)
-    p_profit = row["Profit_Chance"] / 100
-    p_loss   = row["Loss_Risk"] / 100
-    # 지수분포 역산: P(event ≤ t) = 1 - exp(-λt), λ = -ln(1-p)/T
-    lam_profit = -np.log(1 - p_profit + 1e-9) / 20
-    lam_loss   = -np.log(1 - p_loss   + 1e-9) / 20
-    cum_profit = (1 - np.exp(-lam_profit * days)) * 100
-    cum_loss   = (1 - np.exp(-lam_loss   * days)) * 100
+        st.divider()
 
-    fig_surv = go.Figure()
-    fig_surv.add_trace(go.Scatter(
-        x=days, y=cum_profit, name="수익 누적 도달 확률 (+10%)",
-        line=dict(color="#10B981", width=2.5),
-        fill="tozeroy", fillcolor="rgba(16,185,129,0.08)",
-        hovertemplate="Day %{x}: %{y:.1f}%<extra>수익 도달</extra>"))
-    fig_surv.add_trace(go.Scatter(
-        x=days, y=cum_loss, name="손실 누적 도달 확률 (-10%)",
-        line=dict(color="#EF4444", width=2.5),
-        fill="tozeroy", fillcolor="rgba(239,68,68,0.08)",
-        hovertemplate="Day %{x}: %{y:.1f}%<extra>손실 도달</extra>"))
-    # t=20 종점 마커
-    fig_surv.add_trace(go.Scatter(
-        x=[20], y=[cum_profit[-1]], mode="markers+text",
-        marker=dict(color="#10B981", size=10),
-        text=[f"{cum_profit[-1]:.1f}%"], textposition="top right",
-        showlegend=False))
-    fig_surv.add_trace(go.Scatter(
-        x=[20], y=[cum_loss[-1]], mode="markers+text",
-        marker=dict(color="#EF4444", size=10),
-        text=[f"{cum_loss[-1]:.1f}%"], textposition="bottom right",
-        showlegend=False))
-    fig_surv.add_vline(x=20, line_dash="dot", line_color="#9CA3AF", opacity=0.6,
-        annotation_text="Horizon(20일)", annotation_position="top left")
-    fig_surv.update_layout(
-        height=280, margin=dict(l=10, r=10, t=20, b=10),
-        xaxis=dict(title="영업일", tickmode="linear", dtick=2),
-        yaxis=dict(title="누적 도달 확률 (%)", range=[0, max(cum_profit[-1], cum_loss[-1]) * 1.25]),
-        legend=dict(orientation="h", y=1.12, x=0),
-        template="plotly_white", hovermode="x unified")
-    st.plotly_chart(fig_surv, use_container_width=True)
+        # 생존 곡선
+        surv_title_col, surv_info_col = st.columns([5, 1])
+        with surv_title_col:
+            st.markdown("#### 📉 생존분석 — 도달 확률 추이")
+        with surv_info_col:
+            with st.popover("ℹ️"):
+                st.markdown("**생존분석 도달 확률 추이**")
+                st.markdown("""
+RSF 모델의 t=20 종점 확률을 지수분포로 역산한 **근사 누적 곡선**입니다.
 
-    # ── 자동 인사이트
-    st.markdown("#### 💡 AI 인사이트 — 현재 지표 해석")
-    insights = generate_insights(
-        rsi=float(latest["RSI"]), adx=float(latest["ADX"]),
-        volatility=float(latest["Volatility"]),
-        close=float(latest["Close"]), ma20=float(latest["MA20"]),
-    )
-    insight_cols = st.columns(2)
-    for idx, (icon, label, message) in enumerate(insights):
-        with insight_cols[idx % 2]:
+- 🟢 **초록선**: 매수 후 +10% 수익에 도달할 누적 확률
+- 🔴 **빨간선**: 매수 후 -10% 손실에 도달할 누적 확률
+- 두 곡선의 격차가 클수록 수익/손실 비대칭이 유리합니다.
+
+> 실제 RSF가 출력한 곡선이 아닌 종점 확률 기반 근사치입니다.
+                """)
+
+        days = np.arange(1, 21)
+        p_profit = row["Profit_Chance"] / 100
+        p_loss   = row["Loss_Risk"] / 100
+        lam_profit = -np.log(1 - p_profit + 1e-9) / 20
+        lam_loss   = -np.log(1 - p_loss   + 1e-9) / 20
+        cum_profit = (1 - np.exp(-lam_profit * days)) * 100
+        cum_loss   = (1 - np.exp(-lam_loss   * days)) * 100
+
+        fig_surv = go.Figure()
+        fig_surv.add_trace(go.Scatter(
+            x=days, y=cum_profit, name="수익 도달 (+10%)",
+            line=dict(color="#10B981", width=2.5),
+            fill="tozeroy", fillcolor="rgba(16,185,129,0.08)",
+            hovertemplate="Day %{x}: %{y:.1f}%<extra>수익 도달</extra>"))
+        fig_surv.add_trace(go.Scatter(
+            x=days, y=cum_loss, name="손실 도달 (-10%)",
+            line=dict(color="#EF4444", width=2.5),
+            fill="tozeroy", fillcolor="rgba(239,68,68,0.08)",
+            hovertemplate="Day %{x}: %{y:.1f}%<extra>손실 도달</extra>"))
+        fig_surv.add_trace(go.Scatter(
+            x=[20], y=[cum_profit[-1]], mode="markers+text",
+            marker=dict(color="#10B981", size=9),
+            text=[f"{cum_profit[-1]:.1f}%"], textposition="top right", showlegend=False))
+        fig_surv.add_trace(go.Scatter(
+            x=[20], y=[cum_loss[-1]], mode="markers+text",
+            marker=dict(color="#EF4444", size=9),
+            text=[f"{cum_loss[-1]:.1f}%"], textposition="bottom right", showlegend=False))
+        fig_surv.add_shape(type="line", x0=20, x1=20, y0=0, y1=1,
+            xref="x", yref="paper", line=dict(color="#9CA3AF", dash="dot", width=1.2))
+        fig_surv.add_annotation(x=20, y=1, xref="x", yref="paper",
+            text="Horizon", showarrow=False, font=dict(color="#9CA3AF", size=10),
+            xanchor="right", yanchor="top")
+        fig_surv.update_layout(
+            height=240, margin=dict(l=0, r=10, t=10, b=0),
+            xaxis=dict(title="영업일", tickmode="linear", dtick=4),
+            yaxis=dict(title="누적 확률 (%)",
+                       range=[0, max(cum_profit[-1], cum_loss[-1]) * 1.3]),
+            legend=dict(orientation="h", y=1.15, x=0),
+            template="plotly_white", hovermode="x unified")
+        st.plotly_chart(fig_surv, use_container_width=True)
+
+        st.divider()
+
+        # AI 인사이트
+        insight_title_col, insight_info_col = st.columns([5, 1])
+        with insight_title_col:
+            st.markdown("#### 💡 AI 인사이트")
+        with insight_info_col:
+            with st.popover("ℹ️"):
+                st.markdown("**AI 인사이트란?**")
+                st.markdown("""
+최신 기술지표 값을 기반으로 자동 생성된 해석입니다.
+
+- **RSI**: 과매수/과매도 판단
+- **ADX**: 추세 강도 확인
+- **Volatility**: 변동성 수준 경고
+- **MA20**: 단기 추세 위치 확인
+
+> 각 지표의 임계값 기준으로 4가지 인사이트가 자동 생성됩니다.
+                """)
+
+        insights = generate_insights(
+            rsi=float(latest["RSI"]), adx=float(latest["ADX"]),
+            volatility=float(latest["Volatility"]),
+            close=float(latest["Close"]), ma20=float(latest["MA20"]),
+        )
+        for icon, label, message in insights:
             st.markdown(
                 f"""<div style="background:#F8FAFC;border-left:4px solid #3B82F6;
-                    padding:12px 16px;border-radius:8px;margin-bottom:10px;">
-                    <div style="font-size:13px;font-weight:600;color:#374151;">
+                    padding:10px 14px;border-radius:8px;margin-bottom:8px;">
+                    <div style="font-size:12px;font-weight:600;color:#374151;">
                         {icon} {label}
                     </div>
-                    <div style="font-size:13px;color:#6B7280;margin-top:4px;">
+                    <div style="font-size:12px;color:#6B7280;margin-top:3px;">
                         {message}
                     </div></div>""",
                 unsafe_allow_html=True)
 
-    with st.expander("📖 차트 지표 설명 (클릭하면 펼쳐집니다)"):
-        for desc in INDICATOR_HELP.values():
-            st.markdown(f"- {desc}")
+        st.divider()
+        st.caption("⚠️ 본 대시보드는 학술·시연 목적입니다. 투자 권유 또는 자문이 아닙니다.")
 
-    st.markdown("---")
+    # ════════════════════════════════
+    # 오른쪽: 차트 패널
+    # ════════════════════════════════
+    with col_right:
 
-    # ── 몬테카를로 미래 예측 차트
-    st.markdown("#### 🔮 미래 가격 시나리오 — 몬테카를로 시뮬레이션 (20영업일)")
-    if YF_AVAILABLE:
-        st.caption(
-            "GBM(기하 브라운 운동) 기반 500개 경로 시뮬레이션. "
-            "회색: 캐시 과거 데이터 / 컬러 캔들: 오늘까지 실제 가격 / 보라 밴드: 향후 20영업일 예측 시나리오. "
-            "**참고용 통계 시나리오이며 실제 수익을 보장하지 않습니다.**"
+        # 몬테카를로 차트
+        mc_title_col, mc_info_col = st.columns([5, 1])
+        with mc_title_col:
+            st.markdown("#### 🔮 미래 가격 시나리오")
+        with mc_info_col:
+            with st.popover("ℹ️"):
+                st.markdown("**몬테카를로 시뮬레이션**")
+                st.markdown("""
+GBM(기하 브라운 운동) 기반 **500개 경로** 시뮬레이션입니다.
+
+- 🩶 **회색 캔들**: 캐시 기반 과거 데이터
+- 🟢🔴 **컬러 캔들**: yfinance 최신 실제 가격
+- 🟣 **보라 밴드**: 향후 20영업일 예측 시나리오
+  - 진한 밴드: 25~75% 구간 (50% 경로가 이 안에)
+  - 연한 밴드: 5~95% 구간 (90% 경로가 이 안에)
+  - 점선: 중앙값(50th) 경로
+- 🟢 **초록 점선**: +10% 수익 기준선
+- 🔴 **빨간 점선**: -10% 손실 기준선
+
+> 통계적 시나리오이며 실제 수익을 보장하지 않습니다.
+                """)
+
+        if not YF_AVAILABLE:
+            st.caption("*(yfinance 미설치 환경 — 캐시 데이터 기반으로 시뮬레이션)*")
+
+        fig_mc = build_forecast_chart(
+            ticker=sel_ticker,
+            ticker_ohlcv=ticker_ohlcv,
+            volatility=float(latest["Volatility"]),
+            display_days=60,
         )
-    else:
-        st.caption(
-            "GBM(기하 브라운 운동) 기반 500개 경로 시뮬레이션. "
-            "회색: 캐시 과거 데이터 / 보라 밴드: 향후 20영업일 예측 시나리오. "
-            "*(최신 실제 데이터는 환경 설정 후 활성화됩니다)* "
-            "**참고용 통계 시나리오이며 실제 수익을 보장하지 않습니다.**"
-        )
-    fig_mc = build_forecast_chart(
-        ticker=sel_ticker,
-        ticker_ohlcv=ticker_ohlcv,
-        volatility=float(latest["Volatility"]),
-        display_days=60,
-    )
-    st.plotly_chart(fig_mc, use_container_width=True)
+        st.plotly_chart(fig_mc, use_container_width=True)
 
-    st.markdown("---")
+        # 기술지표 차트
+        chart_title_col, chart_info_col = st.columns([5, 1])
+        with chart_title_col:
+            st.markdown("#### 📊 기술지표 차트")
+        with chart_info_col:
+            with st.popover("ℹ️"):
+                st.markdown("**기술지표 안내**")
+                st.markdown("""
+**① MA20 (오버레이)**
+20일 단순 이동평균선. 종가가 MA20 위 → 단기 상승 추세.
 
-    # 캔들 + 보조지표 차트
-    st.markdown("#### 📊 기술지표 차트")
-    fig_chart = build_chart(ticker_ohlcv, period_days)
-    st.plotly_chart(fig_chart, use_container_width=True)
+**② 볼린저 밴드 (오버레이)**
+가격 변동 범위. 상단 돌파 → 과매수, 하단 이탈 → 과매도 신호.
 
-    st.markdown("##### 📌 최근 지표 스냅샷")
-    snap_cols = st.columns(5)
-    for col, (label, value, tip) in zip(snap_cols, [
-        ("종가",       f"${latest['Close']:.2f}",    None),
-        ("RSI",        f"{latest['RSI']:.1f}",        "70↑ 과매수 / 30↓ 과매도"),
-        ("ADX",        f"{latest['ADX']:.1f}",        "25 이상이면 추세 존재"),
-        ("Volatility", f"{latest['Volatility']:.3f}", "높을수록 변동성 큼"),
-        ("MA20",       f"${latest['MA20']:.2f}",      "20일 이동평균선"),
-    ]):
-        with col:
-            st.metric(label, value, help=tip)
+**③ RSI (서브차트)**
+0~100 범위. **70 이상 과매수** (조정 가능성), **30 이하 과매도** (반등 가능성).
+
+**④ ADX (서브차트)**
+추세 강도. **25 이상** → 의미 있는 추세, 25 미만 → 횡보.
+
+**⑤ Volatility (서브차트)**
+20일 로그 수익률 표준편차. **높을수록 리스크 증가. SurviQuant 핵심 예측 변수** (손실 HR 5.28).
+                """)
+
+        fig_chart = build_chart(ticker_ohlcv, period_days)
+        st.plotly_chart(fig_chart, use_container_width=True)
+
+        # 최신 지표 스냅샷
+        st.markdown("##### 📌 최신 지표 스냅샷")
+        snap_cols = st.columns(5)
+        for col, (label, value, tip) in zip(snap_cols, [
+            ("종가",       f"${latest['Close']:.2f}",    None),
+            ("RSI",        f"{latest['RSI']:.1f}",        "70↑ 과매수 / 30↓ 과매도"),
+            ("ADX",        f"{latest['ADX']:.1f}",        "25 이상이면 추세 존재"),
+            ("Volatility", f"{latest['Volatility']:.3f}", "높을수록 변동성 큼 — 핵심 예측 변수"),
+            ("MA20",       f"${latest['MA20']:.2f}",      "20일 이동평균선"),
+        ]):
+            with col:
+                st.metric(label, value, help=tip)
 
 # ============================================================
-# Tab 3 — About / 방법론
+# 8. 푸터
 # ============================================================
-with tab3:
-    st.markdown("## ℹ️ SurviQuant — 프로젝트 소개 및 방법론")
-    st.divider()
-
-    st.markdown("### 🎯 왜 생존분석인가?")
-    st.markdown("""
-일반적인 주가 예측 모델은 **방향성(상승/하락)**만 예측합니다.  
-SurviQuant는 한 걸음 더 나아가 **'언제 도달하는가'** 를 함께 예측합니다.
-
-- 📈 **수익 사건**: 매수 시점 대비 **+10% 도달**까지의 시간
-- 📉 **손실 사건**: 매수 시점 대비 **−10% 도달**까지의 시간
-- ⏱ **예측 Horizon**: 고정 **20영업일** (약 1개월)
-
-> 확률만 아는 것과, 언제 그 확률이 실현될지 아는 것은 전혀 다른 정보입니다.
-    """)
-
-    st.divider()
-    st.markdown("### 🧮 AI Score 산출 공식")
-    st.code("""
-AI Score = Profit_Chance × w_profit + (100 − Loss_Risk) × w_defense
-
-# 성향별 가중치 (λ = Tversky·Kahneman 손실 회피 계수)
-안정형: w_profit=0.31, w_defense=0.69  (λ=2.25)
-중립형: w_profit=0.50, w_defense=0.50  (λ=1.00)
-공격형: w_profit=0.69, w_defense=0.31  (λ=0.44)
-    """, language="python")
-
-    st.divider()
-    st.markdown("### 📐 λ=2.25 학술 근거")
-    st.markdown("""
-안정형 성향의 가중치 비율(31:69)은 행동경제학의 핵심 이론에서 가져왔습니다.
-
-- **Tversky & Kahneman (1992)** — Prospect Theory에서 실증된 손실 회피 계수 **λ ≈ 2.25**
-- 동일 금액의 손실이 이익보다 심리적으로 **2.25배 강하게 느껴진다**는 것을 의미
-- 중립형(λ=1.0)은 손익을 동등하게, 공격형(λ=0.44)은 수익을 더 중시
-
-**금융투자협회 투자자 성향 분류 준칙**의 3단계 구조(안정·중립·공격)와도 일치합니다.
-    """)
-
-    st.divider()
-    st.markdown("### 📊 모델 성능")
-    m1, m2 = st.columns(2)
-    with m1:
-        st.metric("수익 모델 C-index", "0.7087",
-                  help="C-index: 0.5=무작위, 1.0=완벽. 0.7 이상은 임상·금융 분야에서 실용적 수준입니다.")
-    with m2:
-        st.metric("손실 모델 C-index", "0.7681",
-                  help="손실 모델이 더 높은 것은 Volatility(HR 5.28)의 강력한 손실 예측력 덕분입니다.")
-    st.caption("모델: Random Survival Forest (RSF) | 검증: Kaplan-Meier + Cox PH | 핵심 변수: Volatility (수익 HR 2.87 / 손실 HR 5.28)")
-
-    st.divider()
-    st.markdown("### 🌐 확장 가능성")
-    st.success("""
-**SurviQuant는 모듈형 구조로 설계되어 다양한 자산군으로 확장 가능합니다.**
-
-- 코어 규칙(`01_core_rules.md`) 유지 + 도메인 규칙(`02_domain_scoring.md`) 교체만으로:
-  - 🇰🇷 **KOSPI / KOSDAQ** 국내 주식 적용 가능
-  - 📦 **ETF** (섹터 ETF, 채권 ETF 등) 적용 가능
-  - 📊 **개별 섹터 심화 분석** 모듈로 분리 가능
-- OHLCV 스키마와 생존분석 Event 정의만 유지하면 어떤 시계열 금융 데이터도 처리 가능
-    """)
-
-    st.divider()
-    st.markdown("### ⚠️ 데이터 범위 및 한계")
-    st.warning("""
-**RSF 추론 대상은 5섹터 대표 50종목으로 제한됩니다.**
-
-- 학습 데이터 기간: **2010.01 ~ 2026.04 (약 16년, 853,504건 생존분석 레코드)**
-- 생존분석 EDA 대상: S&P 500 **223개 종목** (전체 섹터)
-- RSF 학습·추론 대상: 5개 섹터 대표 **50종목** (연산 효율화를 위한 선별)
-- 거시 지표: 10년물 미국채 수익률(TNX) — 시장 금리 환경을 모델에 반영한 거시지표
-
-> EDA와 생존분석 레코드는 223개 전 종목 기반으로 산출되었으며, RSF 모델 학습과 AI Score 추론은 각 섹터별 대표 종목으로 범위를 한정하였습니다.
-
-본 도구는 **참고용 정량 지표**이며, 투자 권유 또는 자문이 아닙니다.
-    """)
-
+st.divider()
+st.caption("ℹ️ 본 대시보드는 학술·시연 목적으로 제작되었습니다. 투자 권유 또는 자문이 아닙니다.")
 # ============================================================
 # 8. 푸터
 # ============================================================
