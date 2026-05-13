@@ -523,7 +523,7 @@ SurviQuant는 **'언제 도달하는가'** 라는 시간 차원을 함께 예측
 
         st.markdown("**AI Score 공식**")
         st.code(
-            "AI Score = Profit_Chance × w_profit\n"
+            "AI Score = Profit_Chance × w_profit"
             "         + (100 − Loss_Risk) × w_defense",
             language="python")
         st.markdown("수익 동력과 하방 방어를 동시에 반영해 단순 확률보다 실용적인 지표를 제공합니다.")
