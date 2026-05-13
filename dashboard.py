@@ -63,29 +63,22 @@ h4 {
     font-size: 18px !important;
 }
 
-/* ── ⓘ 팝오버 버튼 → 원형 아이콘 뱃지 ── */
+/* ── ⓘ 팝오버 버튼 → 텍스트만, 테두리·배경 없음 ── */
 button[data-testid="stPopoverButton"] {
     background: transparent !important;
-    border: 1.5px solid #94A3B8 !important;
-    border-radius: 50% !important;
-    min-height: 26px !important;
-    height: 26px !important;
-    min-width: 26px !important;
-    width: 26px !important;
+    border: none !important;
+    box-shadow: none !important;
     padding: 0px !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    color: #64748B !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    color: #6B7280 !important;
     line-height: 1 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.15s ease !important;
+    transition: color 0.15s ease !important;
 }
 button[data-testid="stPopoverButton"]:hover {
-    border-color: #3B82F6 !important;
+    background: transparent !important;
+    border: none !important;
     color: #3B82F6 !important;
-    background: rgba(59,130,246,0.07) !important;
 }
 [data-testid="stCaptionContainer"] p {
     font-size: 12px !important;
