@@ -1,0 +1,402 @@
+{
+  "ANET": {
+    "name": "Arista Networks, Inc.",
+    "summary": "Arista Networks, Inc. engages in the development, marketing, and sale of data-driven, client to cloud networking solutions for AI, data center, campus, and routing environments in the Americas, Europe, the Middle East, Africa, and the Asia-Pacific. Its cloud networking solutions consist of Extensible Operating System (EOS), a publish-subscribe state-sharing networking operating system offered in c...",
+    "website": "https://www.arista.com",
+    "market_cap": 179482001408,
+    "employees": 5115,
+    "industry": "Computer Hardware"
+  },
+  "AMAT": {
+    "name": "Applied Materials, Inc.",
+    "summary": "Applied Materials, Inc. provides materials engineering solutions, equipment, services, and software to the semiconductor and related industries in the United States, China, Korea, Taiwan, Japan, Southeast Asia, Europe, and internationally. The company operates through Semiconductor Systems and Applied Global Services (AGS) segments. The Semiconductor Systems segment includes semiconductor capital ...",
+    "website": "https://www.appliedmaterials.com",
+    "market_cap": 342204579840,
+    "employees": 35500,
+    "industry": "Semiconductor Equipment & Materials"
+  },
+  "COHR": {
+    "name": "Coherent Corp.",
+    "summary": "Coherent Corp. develops, manufactures, and markets engineered materials, optoelectronic components and devices, and laser systems for the use in the industrial, communications, electronics, and instrumentation markets worldwide. It operates through three segments: Networking, Materials, and Lasers. The Networking segment offers transceivers, systems, subsystems, modules, components, optics, and se...",
+    "website": "https://www.coherent.com",
+    "market_cap": 73171066880,
+    "employees": 30216,
+    "industry": "Scientific & Technical Instruments"
+  },
+  "CDNS": {
+    "name": "Cadence Design Systems, Inc.",
+    "summary": "Cadence Design Systems, Inc. develops computational, AI-driven software, hardware, and silicon intellectual property products and solutions. The company offers functional verification services, such as Jasper, a formal verification platform; Xcelium, a parallel logic simulation platform; Verisium, a generative AI solution; Palladium, an enterprise emulation platform; and Protium, a prototyping pla...",
+    "website": "https://www.cadence.com",
+    "market_cap": 98753159168,
+    "employees": 15110,
+    "industry": "Software - Application"
+  },
+  "ADI": {
+    "name": "Analog Devices, Inc.",
+    "summary": "Analog Devices, Inc. engages in the design, manufacture, testing, and marketing of integrated circuits (ICs), software, and subsystems products in the United States, rest of North and South America, Europe, Japan, China, and rest of Asia. It provides data converter products, which translate real-world analog signals into digital data, as well as translates digital data into analog signals; power m...",
+    "website": "https://www.analog.com",
+    "market_cap": 204874874880,
+    "employees": 24500,
+    "industry": "Semiconductors"
+  },
+  "CVNA": {
+    "name": "Carvana Co.",
+    "summary": "Carvana Co., together with its subsidiaries, operates an e-commerce platform for buying and selling used cars. It provides vehicle acquisition, inspection and reconditioning, online search and shopping experience, financing, complementary products, logistics network and distinctive fulfillment experience, and post-sale customer support services. The company also operates auction sites. Carvana Co....",
+    "website": "https://www.carvana.com",
+    "market_cap": 58533519360,
+    "employees": 23100,
+    "industry": "Auto & Truck Dealerships"
+  },
+  "APA": {
+    "name": "APA Corporation",
+    "summary": "APA Corporation, an independent energy company, explores for, develops, and produces natural gas, crude oil, and natural gas liquids. The company has oil and gas operations in the United States, Egypt, and North Sea. It also has exploration and appraisal activities in Suriname, as well as holds interests in projects located in Uruguay and internationally. APA Corporation was incorporated in 1954 a...",
+    "website": "https://www.apacorp.com",
+    "market_cap": 13110211584,
+    "employees": 1791,
+    "industry": "Oil & Gas E&P"
+  },
+  "BSX": {
+    "name": "Boston Scientific Corporation",
+    "summary": "Boston Scientific Corporation develops, manufactures, and markets medical devices for use in various interventional medical specialties worldwide. The company operates in two segments, MedSurg and Cardiovascular. It offers devices to diagnose and treat a range of gastrointestinal conditions, such as resolution clips, biliary stent systems, stents and electrocautery enhanced delivery systems, SpyGl...",
+    "website": "https://www.bostonscientific.com",
+    "market_cap": 80411811840,
+    "employees": 59000,
+    "industry": "Medical Devices"
+  },
+  "AVGO": {
+    "name": "Broadcom Inc.",
+    "summary": "Broadcom Inc. designs, develops, and supplies various semiconductor devices and infrastructure software solutions internationally. The company operates in two segments: Semiconductor Solutions and Infrastructure Software. The company offers networking connectivity, such as custom silicon solutions, ethernet switching & routing, ethernet NIC controllers, physical layer devices, and fiber optic comp...",
+    "website": "https://www.broadcom.com",
+    "market_cap": 1985246396416,
+    "employees": 33000,
+    "industry": "Semiconductors"
+  },
+  "ACN": {
+    "name": "Accenture plc",
+    "summary": "Accenture plc provides strategy and consulting, industry X, song, and technology and operation services in the Americas, Europe, the Middle East, Africa, and the Asia Pacific. It offers systems integration and application management; security; intelligent platform; infrastructure; software engineering; data, AI, cloud; and automation and global delivery services. The company also operates business...",
+    "website": "https://www.accenture.com",
+    "market_cap": 104482422784,
+    "employees": 786000,
+    "industry": "Information Technology Services"
+  },
+  "BKR": {
+    "name": "Baker Hughes Company",
+    "summary": "Baker Hughes Company provides a portfolio of technologies and services to energy and industrial value chain. Its Oilfield Services & Equipment segment designs and manufactures exploration, appraisal, development, production, rejuvenation, and decommissioning products and related services for onshore and offshore oilfield operations. This segment also provides drilling services, drill bits, and dri...",
+    "website": "https://www.bakerhughes.com",
+    "market_cap": 64722558976,
+    "employees": 53000,
+    "industry": "Oil & Gas Equipment & Services"
+  },
+  "APH": {
+    "name": "Amphenol Corporation",
+    "summary": "Amphenol Corporation, together with its subsidiaries, designs, manufactures, and markets electrical, electronic, and fiber optic connectors in the United States, China, and internationally. It operates through three segments: Communications Solutions, Harsh Environment Solutions, and Interconnect and Sensor Systems. The company offers connectors and connector systems, including high speed, radio f...",
+    "website": "https://www.amphenol.com",
+    "market_cap": 157310091264,
+    "employees": 170000,
+    "industry": "Electronic Components"
+  },
+  "APP": {
+    "name": "AppLovin Corporation",
+    "summary": "AppLovin Corporation provides end-to-end artificial intelligence-powered advertising solutions for businesses in the United States and internationally. It operates through two segments, Advertising and Apps. The company offers Axon Ads Manager, a suite of marketing solutions that enables developers to automate, optimize, and manage marketing efforts; MAX, an in-app bidding technology that optimize...",
+    "website": "https://www.applovin.com",
+    "market_cap": 164842160128,
+    "employees": 876,
+    "industry": "Advertising Agencies"
+  },
+  "BAX": {
+    "name": "Baxter International Inc.",
+    "summary": "Baxter International Inc., through its subsidiaries, provides a portfolio of healthcare products in the United States. The company operates through three segments: Medical Products & Therapies, Healthcare Systems & Technologies, and Pharmaceuticals. It offers sterile intravenous (IV) solutions; infusion systems and devices; parenteral nutrition therapies; inhaled anesthetics; generic injectable ph...",
+    "website": "https://www.baxter.com",
+    "market_cap": 9239629824,
+    "employees": 37500,
+    "industry": "Medical Instruments & Supplies"
+  },
+  "ALGN": {
+    "name": "Align Technology, Inc.",
+    "summary": "Align Technology, Inc. provides Invisalign clear aligners, Vivera retainers, and iTero intraoral scanners and services in the United States, Switzerland, and internationally. The company's Clear Aligner segment offers Invisalign comprehensive package to treat adults and teens malocclusion and features, and orthodontic needs of teenage or younger patients; and Invisalign First Phase I and Invisalig...",
+    "website": "https://www.aligntech.com",
+    "market_cap": 11873568768,
+    "employees": 20275,
+    "industry": "Medical Instruments & Supplies"
+  },
+  "APTV": {
+    "name": "Aptiv PLC",
+    "summary": "Aptiv PLC, an industrial technology company, provides hardware and software solutions to support automotive and other industries in North America, Europe, the Middle East, Africa, the Asia Pacific, and South America. It operates through three segments: Advanced Safety and User Experience, Engineered Components, and Electrical Distribution Systems. The company offers active safety, user experience ...",
+    "website": "https://www.aptiv.com",
+    "market_cap": 11628548096,
+    "employees": 140000,
+    "industry": "Auto Parts"
+  },
+  "CTSH": {
+    "name": "Cognizant Technology Solutions Corporation",
+    "summary": "Cognizant Technology Solutions Corporation, a professional services company, provides consulting and technology, and outsourcing services in North America, Europe, and internationally. It operates through four segments: Financial Services; Health Sciences; Products and Resources; and Communications, Media and Technology. The company provides services including artificial intelligence (AI) and othe...",
+    "website": "https://www.cognizant.com",
+    "market_cap": 22576289792,
+    "employees": 357600,
+    "industry": "Information Technology Services"
+  },
+  "BKNG": {
+    "name": "Booking Holdings Inc.",
+    "summary": "Booking Holdings Inc., together with its subsidiaries, provides online and traditional travel and restaurant reservations and related services in the United States, the Netherlands, the United Kingdom, and internationally. The company operates Booking.com, which offers online accommodation reservations; and Priceline, which provides discount travel reservations services, as well as online accommod...",
+    "website": "https://www.bookingholdings.com",
+    "market_cap": 124414484480,
+    "employees": 24900,
+    "industry": "Travel Services"
+  },
+  "CCL": {
+    "name": "Carnival Corporation Ltd.",
+    "summary": "Carnival Corporation Ltd., a cruise company, provides leisure travel services in North America, Australia, Europe, and internationally. The company operates through four segments: North America Cruise Operations, Europe Cruise Operations, Cruise Support, and Tour and Other. It operates port destinations and islands, as well as owns and operates hotels, lodges, glass-domed railcars, and motorcoache...",
+    "website": "https://www.carnivalcorp.com",
+    "market_cap": 34420719616,
+    "employees": 160000,
+    "industry": "Travel Services"
+  },
+  "CIEN": {
+    "name": "Ciena Corporation",
+    "summary": "Ciena Corporation, a network technology company, provides hardware, software, and services for various network operators in the Americas, Europe, the Middle East, Africa, the Asia Pacific, Japan, and India. It operates through Networking Platforms, Platform Software and Services, Blue Planet Automation Software and Services, and Global Services segments. The Networking Platforms segment consists o...",
+    "website": "https://www.ciena.com",
+    "market_cap": 81608105984,
+    "employees": 8898,
+    "industry": "Communication Equipment"
+  },
+  "CNC": {
+    "name": "Centene Corporation",
+    "summary": "Centene Corporation operates as a managed care company that provides programs and services to under-insured families, and commercial organizations in the United States. It operates through four segments: Medicaid, Medicare, Commercial, and Other. The Medicaid segment offers the temporary assistance for needy families; medicaid expansion; aged, blind, or disabled; and children's health insurance pr...",
+    "website": "https://www.centene.com",
+    "market_cap": 29287100416,
+    "employees": 61000,
+    "industry": "Healthcare Plans"
+  },
+  "AMZN": {
+    "name": "Amazon.com, Inc.",
+    "summary": "Amazon.com, Inc. engages in the retail sale of consumer products, advertising, and subscriptions service through online and physical stores in North America and internationally. The company operates through three segments: North America, International, and Amazon Web Services (AWS). It also manufactures and sells electronic devices, including Kindle, fire tablets, fire TVs, echo, ring, blink, and ...",
+    "website": "https://www.amazon.com",
+    "market_cap": 2859454955520,
+    "employees": 1575000,
+    "industry": "Internet Retail"
+  },
+  "ABNB": {
+    "name": "Airbnb, Inc.",
+    "summary": "Airbnb, Inc., together with its subsidiaries, operates a platform for stays, experiences, and services worldwide. The company's marketplace connects hosts and guests online or through mobile devices to book spaces, experiences, and services. It also offers gift cards. The company was formerly known as AirBed & Breakfast, Inc. and changed its name to Airbnb, Inc. in November 2010. Airbnb, Inc. was ...",
+    "website": "https://www.airbnb.com",
+    "market_cap": 80408043520,
+    "employees": 8200,
+    "industry": "Travel Services"
+  },
+  "CDW": {
+    "name": "CDW Corporation",
+    "summary": "CDW Corporation provides information technology (IT) solutions in the United States, the United Kingdom, and Canada. It operates through three segments: Commercial, Government, and Education. The company offers discrete hardware and software products and services, as well as integrated IT solutions, including on-premise and cloud capabilities across hybrid infrastructure, digital experience, and s...",
+    "website": "https://www.cdw.com",
+    "market_cap": 12685918208,
+    "employees": 14800,
+    "industry": "Information Technology Services"
+  },
+  "BIIB": {
+    "name": "Biogen Inc.",
+    "summary": "Biogen Inc. discovers, develops, manufactures, and delivers therapies in the United States, Europe, Germany, Asia, and internationally. The company provides TECFIDERA, VUMERITY, AVONEX, PLEGRIDY, and TYSABRI for multiple sclerosis (MS); SPINRAZA for spinal muscular atrophy; SKYCLARYS to treat Friedreich's Ataxia; QALSODY for treating amyotrophic lateral sclerosis; FUMADERM to treat plaque psoriasi...",
+    "website": "https://www.biogen.com",
+    "market_cap": 29432936448,
+    "employees": 7500,
+    "industry": "Drug Manufacturers - General"
+  },
+  "AMD": {
+    "name": "Advanced Micro Devices, Inc.",
+    "summary": "Advanced Micro Devices, Inc. operates as a semiconductor company internationally. It operates in three segments: Data Center, Client and Gaming, and Embedded. The company offers artificial intelligence (AI) accelerators, microprocessors, and graphics processing units (GPUs) as standalone devices or as incorporated into accelerated processing units, chipsets, and data center and professional GPUs; ...",
+    "website": "https://www.amd.com",
+    "market_cap": 730981924864,
+    "employees": 31000,
+    "industry": "Semiconductors"
+  },
+  "TECH": {
+    "name": "Bio-Techne Corporation",
+    "summary": "Bio-Techne Corporation, together with its subsidiaries, develops, manufactures, and sells life science reagents, instruments, and services for the research, diagnostics, and bioprocessing markets worldwide. The company operates through two segments, Protein Sciences, and Diagnostics and Spatial Biology. The Protein Sciences segment develops and manufactures biological reagents used in various aspe...",
+    "website": "https://www.bio-techne.com",
+    "market_cap": 7424489984,
+    "employees": 3100,
+    "industry": "Biotechnology"
+  },
+  "ADBE": {
+    "name": "Adobe Inc.",
+    "summary": "Adobe Inc. operates as a technology company worldwide. The Digital Media segment offers products and services that enable individuals, teams, and enterprises to create, publish, and promote content. This segment serves photographers, video editors, graphic and experience designers, game developers, content creators, students, marketers, business owners, knowledge workers, and consumers. The Digita...",
+    "website": "https://www.adobe.com",
+    "market_cap": 97343488000,
+    "employees": 31360,
+    "industry": "Software - Application"
+  },
+  "BBY": {
+    "name": "Best Buy Co., Inc.",
+    "summary": "Best Buy Co., Inc. offers technology products and solutions in the United States, Canada, and internationally. The company provides computing and mobile phone products, such as desktops, notebooks, and peripherals; mobile phones comprising related mobile network carrier commissions; networking products; tablets covering e-readers; smartwatches; and consumer electronics consisting of digital imagin...",
+    "website": "https://corporate.bestbuy.com",
+    "market_cap": 12051764224,
+    "employees": 82000,
+    "industry": "Specialty Retail"
+  },
+  "ADSK": {
+    "name": "Autodesk, Inc.",
+    "summary": "Autodesk, Inc. engages in the provision of 3D design, engineering, and entertainment technology solutions worldwide. The company offers AutoCAD Civil 3D, a surveying, design, analysis, and documentation solution; Autodesk Build, a toolset for managing, sharing, and accessing project documents for streamlined workflows between the office, trailer, and jobsite; Revit, a software built for building i...",
+    "website": "https://www.autodesk.com",
+    "market_cap": 49591685120,
+    "employees": 14300,
+    "industry": "Software - Application"
+  },
+  "CRL": {
+    "name": "Charles River Laboratories International, Inc.",
+    "summary": "Charles River Laboratories International, Inc. provides drug discovery, non-clinical development, and safety testing services in the United States, Europe, Canada, the Asia Pacific, and internationally. The Research Models and Services segment produces and sells rodents, and purpose-bred rats and mice for use by researchers. This segment also provides a range of services to assist its clients in s...",
+    "website": "https://www.criver.com",
+    "market_cap": 8125414400,
+    "employees": 18300,
+    "industry": "Diagnostics & Research"
+  },
+  "AKAM": {
+    "name": "Akamai Technologies, Inc.",
+    "summary": "Akamai Technologies, Inc. engages in the provision of security, delivery, and cloud computing solutions in the United States and internationally. It offers security solutions that include web application and application programming interfaces (API) protection solutions, which protect web, API, and mobile app traffic from attacks; Bot & Abuse portfolio, which provides solutions to help customers pr...",
+    "website": "https://www.akamai.com",
+    "market_cap": 21743847424,
+    "employees": 11419,
+    "industry": "Software - Infrastructure"
+  },
+  "CMG": {
+    "name": "Chipotle Mexican Grill, Inc.",
+    "summary": "Chipotle Mexican Grill, Inc., together with its subsidiaries, owns and operates Chipotle Mexican Grill restaurants. It sells food and beverages, such as burritos, burrito bowls, quesadillas, tacos, and salads, as well as kids's meals, chips, and sides. It offers Mexican-inspired meals using responsibly sourced meats, such as chicken, beef, and pork branded as Responsibly Raised. The company also p...",
+    "website": "https://www.chipotle.com",
+    "market_cap": 41906917376,
+    "employees": 135000,
+    "industry": "Restaurants"
+  },
+  "A": {
+    "name": "A",
+    "summary": "Agilent Technologies, Inc. provides application focused solutions to the life sciences, diagnostics, and applied chemical markets worldwide. The company operates through three segments: Life Sciences and Diagnostics Markets, Agilent CrossLab, and Applied Markets. The Life Sciences and Diagnostics Markets segment offers liquid chromatography systems and components; and liquid chromatography mass sp...",
+    "website": "https://www.agilent.com",
+    "market_cap": 31905800192,
+    "employees": 18000,
+    "industry": "Diagnostics & Research"
+  },
+  "CSCO": {
+    "name": "Cisco Systems, Inc.",
+    "summary": "Cisco Systems, Inc. designs, develops, and sells technologies that help to power, secure, and draw insights from the internet in the Americas, Europe, the Middle East, Africa, the Asia Pacific, Japan, and China. The company offers data center switching; network security, identity and access management, and secure access service edge; threat intelligence, detection, and response solutions; intercon...",
+    "website": "https://www.cisco.com",
+    "market_cap": 392184889344,
+    "employees": 86200,
+    "industry": "Communication Equipment"
+  },
+  "CHTR": {
+    "name": "Charter Communications, Inc.",
+    "summary": "Charter Communications, Inc. operates as a broadband connectivity company in the United States. The company offers subscription-based internet, mobile, video, and voice services; broadband connectivity services, including fixed internet, WiFi, and mobile; Spectrum internet products; advanced WiFi services; and in-home WiFi, which provides customers with high performance wireless routers and manage...",
+    "website": "https://corporate.charter.com",
+    "market_cap": 20883103744,
+    "employees": 91900,
+    "industry": "Telecom Services"
+  },
+  "GOOGL": {
+    "name": "Alphabet Inc.",
+    "summary": "Alphabet Inc. offers various products and platforms in the United States, Europe, the Middle East, Africa, the Asia-Pacific, Canada, and Latin America. It operates through Google Services, Google Cloud, and Other Bets segments. The Google Services segment provides products and services, including ads, Android, Chrome, devices, Gmail, Google Drive, Google Maps, Google Photos, Google Play, Search, a...",
+    "website": "https://abc.xyz",
+    "market_cap": 4692917092352,
+    "employees": 194668,
+    "industry": "Internet Content & Information"
+  },
+  "CI": {
+    "name": "The Cigna Group",
+    "summary": "The Cigna Group, together with its subsidiaries, provides insurance and related products and services in the United States. It operates through two segments: Evernorth Health Services and Cigna Healthcare. The Evernorth Health Services segment includes Pharmacy Benefit Services and Specialty and Care Services, offering pharmacy benefit management, drug claim adjudication, retail pharmacy network a...",
+    "website": "https://www.thecignagroup.com",
+    "market_cap": 78960271360,
+    "employees": 65669,
+    "industry": "Healthcare Plans"
+  },
+  "ABT": {
+    "name": "Abbott Laboratories",
+    "summary": "Abbott Laboratories, together with its subsidiaries, discovers, develops, manufactures, and sells health care products worldwide. It operates in four segments: Established Pharmaceutical Products, Diagnostic Products, Nutritional Products, and Medical Devices. The company offers generic pharmaceuticals for the treatment of pancreatic exocrine insufficiency, irritable bowel syndrome or biliary spas...",
+    "website": "https://www.abbott.com",
+    "market_cap": 146921930752,
+    "employees": 122000,
+    "industry": "Medical Devices"
+  },
+  "AMGN": {
+    "name": "Amgen Inc.",
+    "summary": "Amgen Inc. discovers, develops, manufactures, and delivers human therapeutics worldwide. The company's principal products include Enbrel for the treatment of rheumatoid arthritis, plaque psoriasis, and psoriatic arthritis; Otezla for the treatment of adult patients with plaque psoriasis, psoriatic arthritis, and oral ulcers associated with Behçet's disease; Prolia to treat postmenopausal women wit...",
+    "website": "https://www.amgen.com",
+    "market_cap": 181596602368,
+    "employees": 31500,
+    "industry": "Drug Manufacturers - General"
+  },
+  "CVX": {
+    "name": "Chevron Corporation",
+    "summary": "Chevron Corporation, through its subsidiaries, engages in the integrated energy and chemicals operations in the United States and internationally. It operates through Upstream, Downstream, and All Other segments. The Upstream segment engages in the exploration for, development, production, and transportation of crude oil and natural gas; processing, liquefaction, transportation, and regasification...",
+    "website": "https://www.chevron.com",
+    "market_cap": 370337579008,
+    "employees": 43039,
+    "industry": "Oil & Gas Integrated"
+  },
+  "GOOG": {
+    "name": "Alphabet Inc.",
+    "summary": "Alphabet Inc. offers various products and platforms in the United States, Europe, the Middle East, Africa, the Asia-Pacific, Canada, and Latin America. It operates through Google Services, Google Cloud, and Other Bets segments. The Google Services segment provides products and services, including ads, Android, Chrome, devices, Gmail, Google Drive, Google Maps, Google Photos, Google Play, Search, a...",
+    "website": "https://abc.xyz",
+    "market_cap": 4650149871616,
+    "employees": 194668,
+    "industry": "Internet Content & Information"
+  },
+  "AZO": {
+    "name": "AutoZone, Inc.",
+    "summary": "AutoZone, Inc. operates as a retailer and distributor of automotive replacement parts and accessories in the United States, Mexico, and Brazil. The company offers a product line for cars, sport utility vehicles, vans, and light duty trucks, including new and remanufactured automotive hard parts, maintenance items, accessories, and non-automotive products. It also provides A/C compressors, batterie...",
+    "website": "https://www.autozone.com",
+    "market_cap": 56493125632,
+    "employees": 78000,
+    "industry": "Auto Parts"
+  },
+  "AAPL": {
+    "name": "Apple Inc.",
+    "summary": "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. The company offers iPhone, a line of smartphones; Mac, a line of personal computers; iPad, a line of multi-purpose tablets; and wearables, home, and accessories comprising AirPods, Apple Vision Pro, Apple TV, Apple Watch, Beats products, and HomePod, as well as Apple brande...",
+    "website": "https://www.apple.com",
+    "market_cap": 4329832448000,
+    "employees": 166000,
+    "industry": "Consumer Electronics"
+  },
+  "ABBV": {
+    "name": "AbbVie Inc.",
+    "summary": "AbbVie Inc., a research-based biopharmaceutical company, engages in the research and development, manufacturing, commercializing, and sale of medicines and therapies worldwide. The company offers Skyrizi to treat autoimmune diseases; Rinvoq to treat inflammatory diseases; Imbruvica for the treatment of adult patients with blood cancers; Venclexta to treat blood cancers; Elahere to treat various ca...",
+    "website": "https://www.abbvie.com",
+    "market_cap": 367245557760,
+    "employees": 57000,
+    "industry": "Drug Manufacturers - General"
+  },
+  "CAH": {
+    "name": "Cardinal Health, Inc.",
+    "summary": "Cardinal Health, Inc. operates as a healthcare services and products company in the United States and internationally. It operates in two segments: Pharmaceutical and Specialty Solutions, and Global Medical Products and Distribution. The company provides customized solutions for hospitals, healthcare systems, pharmacies, ambulatory surgery centers, clinical laboratories, physician offices, and pat...",
+    "website": "https://www.cardinalhealth.com",
+    "market_cap": 42756620288,
+    "employees": 53084,
+    "industry": "Medical Distribution"
+  },
+  "COR": {
+    "name": "Cencora, Inc.",
+    "summary": "Cencora, Inc. sources and distributes pharmaceutical products in the United States and internationally. The company's U.S. Healthcare Solutions segment distributes generic and injectable pharmaceuticals, over-the-counter healthcare products, home healthcare supplies and equipment, and related services to acute care hospitals and health systems, independent and chain retail pharmacies, mail order p...",
+    "website": "https://www.cencora.com",
+    "market_cap": 50766815232,
+    "employees": 47000,
+    "industry": "Medical Distribution"
+  },
+  "BDX": {
+    "name": "Becton, Dickinson and Company",
+    "summary": "Becton, Dickinson and Company develops, manufactures, and sells medical supplies, devices, laboratory equipment, and diagnostic products for healthcare institutions, physicians, life science researchers, clinical laboratories, pharmaceutical industry, and the general public worldwide. It operates through Medical Essentials, Connected Care, BioPharma Systems, Interventional and Life Sciences segmen...",
+    "website": "https://www.bd.com",
+    "market_cap": 40644964352,
+    "employees": 60000,
+    "industry": "Medical Instruments & Supplies"
+  },
+  "BMY": {
+    "name": "Bristol-Myers Squibb Company",
+    "summary": "Bristol-Myers Squibb Company discovers, develops, licenses, manufactures, markets, distributes, and sells biopharmaceutical products worldwide. It offers products for oncology, hematology, immunology, cardiovascular, neuroscience, and other areas. The company's products include Opdivo for various anti-cancer indications; Opdivo Qvantig, a subcutaneous PD-1 inhibitor for solid tumorsr; Orencia for ...",
+    "website": "https://www.bms.com",
+    "market_cap": 115274924032,
+    "employees": 32500,
+    "industry": "Drug Manufacturers - General"
+  },
+  "T": {
+    "name": "AT&T Inc.",
+    "summary": "AT&T Inc. provides telecommunications and technology services worldwide. It operates through two segments, Communications and Latin America. The Communications segment offers wireless voice and data communications services; and sells handsets, wireless data cards, wireless computing devices, carrying cases/protective covers, and wireless chargers through its own company-owned stores, agents, and t...",
+    "website": "https://www.att.com",
+    "market_cap": 175306588160,
+    "employees": 132590,
+    "industry": "Telecom Services"
+  }
+}
