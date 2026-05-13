@@ -206,7 +206,9 @@ with st.sidebar:
     st.caption(f"📅 기준일: **{meta['reference_date']}**")
     st.caption(f"⏱ Horizon: **{meta['horizon_days']}영업일**")
     st.caption(f"📊 C-index — Profit **{meta['model_performance_c_index']['profit_model']}** / Loss **{meta['model_performance_c_index']['loss_model']}**")
-    st.caption(f"🎯 분석 종목: **약 200개** (5섹터 대표주)")
+    universe = meta.get("universe", {})
+    st.caption(f"🔬 생존분석 대상: **{universe.get('survival_records_tickers', 223)}개** 종목")
+    st.caption(f"🤖 RSF 추론 대상: **{universe.get('modeled_tickers', 50)}개** (5섹터 대표주)")
 
 # ============================================================
 # 6. AI Score 계산 + 정렬
@@ -372,6 +374,52 @@ with tab2:
         legend=dict(orientation="h", y=1.6, x=0), template="plotly_white")
     st.plotly_chart(fig_bar, use_container_width=True)
 
+    # ── 생존 곡선 (지수분포 근사)
+    st.markdown("#### 📉 생존분석 — 수익·손실 도달 확률 추이 (20영업일)")
+    st.caption("RSF 모델의 t=20 종점 확률을 지수분포로 역산한 근사 곡선입니다. 실제 도달 시점의 분포를 직관적으로 보여줍니다.")
+
+    import numpy as np
+    days = np.arange(1, 21)
+    p_profit = row["Profit_Chance"] / 100
+    p_loss   = row["Loss_Risk"] / 100
+    # 지수분포 역산: P(event ≤ t) = 1 - exp(-λt), λ = -ln(1-p)/T
+    lam_profit = -np.log(1 - p_profit + 1e-9) / 20
+    lam_loss   = -np.log(1 - p_loss   + 1e-9) / 20
+    cum_profit = (1 - np.exp(-lam_profit * days)) * 100
+    cum_loss   = (1 - np.exp(-lam_loss   * days)) * 100
+
+    fig_surv = go.Figure()
+    fig_surv.add_trace(go.Scatter(
+        x=days, y=cum_profit, name="수익 누적 도달 확률 (+10%)",
+        line=dict(color="#10B981", width=2.5),
+        fill="tozeroy", fillcolor="rgba(16,185,129,0.08)",
+        hovertemplate="Day %{x}: %{y:.1f}%<extra>수익 도달</extra>"))
+    fig_surv.add_trace(go.Scatter(
+        x=days, y=cum_loss, name="손실 누적 도달 확률 (-10%)",
+        line=dict(color="#EF4444", width=2.5),
+        fill="tozeroy", fillcolor="rgba(239,68,68,0.08)",
+        hovertemplate="Day %{x}: %{y:.1f}%<extra>손실 도달</extra>"))
+    # t=20 종점 마커
+    fig_surv.add_trace(go.Scatter(
+        x=[20], y=[cum_profit[-1]], mode="markers+text",
+        marker=dict(color="#10B981", size=10),
+        text=[f"{cum_profit[-1]:.1f}%"], textposition="top right",
+        showlegend=False))
+    fig_surv.add_trace(go.Scatter(
+        x=[20], y=[cum_loss[-1]], mode="markers+text",
+        marker=dict(color="#EF4444", size=10),
+        text=[f"{cum_loss[-1]:.1f}%"], textposition="bottom right",
+        showlegend=False))
+    fig_surv.add_vline(x=20, line_dash="dot", line_color="#9CA3AF", opacity=0.6,
+        annotation_text="Horizon(20일)", annotation_position="top left")
+    fig_surv.update_layout(
+        height=280, margin=dict(l=10, r=10, t=20, b=10),
+        xaxis=dict(title="영업일", tickmode="linear", dtick=2),
+        yaxis=dict(title="누적 도달 확률 (%)", range=[0, max(cum_profit[-1], cum_loss[-1]) * 1.25]),
+        legend=dict(orientation="h", y=1.12, x=0),
+        template="plotly_white", hovermode="x unified")
+    st.plotly_chart(fig_surv, use_container_width=True)
+
     # ── 자동 인사이트
     st.markdown("#### 💡 AI 인사이트 — 현재 지표 해석")
     insights = generate_insights(
@@ -482,11 +530,14 @@ AI Score = Profit_Chance × w_profit + (100 − Loss_Risk) × w_defense
     st.divider()
     st.markdown("### ⚠️ 데이터 범위 및 한계")
     st.warning("""
-**현재 버전의 분석 대상은 50종목으로 제한됩니다.**
+**RSF 추론 대상은 5섹터 대표 50종목으로 제한됩니다.**
 
-- 분석 기간: 2024.04 ~ 2026.04 (약 502영업일)
-- 대상: S&P 500 5개 섹터 대표 50종목 (전체 생존 레코드는 약 200개 종목 활용)
+- 학습 데이터 기간: **2010.01 ~ 2026.04 (약 16년, 853,504건 생존분석 레코드)**
+- 생존분석 EDA 대상: S&P 500 **223개 종목** (전체 섹터)
+- RSF 학습·추론 대상: 5개 섹터 대표 **50종목** (연산 효율화를 위한 선별)
 - 거시 지표: 10년물 미국채 수익률(TNX) — 시장 금리 환경을 모델에 반영한 거시지표
+
+> EDA와 생존분석 레코드는 223개 전 종목 기반으로 산출되었으며, RSF 모델 학습과 AI Score 추론은 각 섹터별 대표 종목으로 범위를 한정하였습니다.
 
 본 도구는 **참고용 정량 지표**이며, 투자 권유 또는 자문이 아닙니다.
     """)
