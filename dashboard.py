@@ -474,7 +474,7 @@ SurviQuant는 **'언제 도달하는가'** 라는 시간 차원을 함께 예측
 
 ◦ 수익 사건: 매수 시점 대비 +10% 도달까지의 시간  
 ◦ 손실 사건: 매수 시점 대비 −10% 도달까지의 시간  
-◦ 예측 Horizon: 고정 20영업일
+◦ 예측: 20영업일 고정
         """)
         st.divider()
 
@@ -489,10 +489,9 @@ SurviQuant는 **'언제 도달하는가'** 라는 시간 차원을 함께 예측
 
         st.markdown("**AI Score 공식**")
         st.code(
-            "AI Score = Profit_Chance × w_profit\n"
-            "         + (100 − Loss_Risk) × w_defense",
+            "AI Score = Profit_Chance × w_profit\n + (100 − Loss_Risk) × w_defense",
             language="python")
-        st.markdown("수익 동력과 하방 방어를 동시에 반영해 단순 확률보다 실용적인 지표를 제공합니다.")
+        st.markdown("수익과 하락 방지를 동시에 반영해 단순 확률보다 실용적인 지표를 제공합니다.")
         st.divider()
 
         st.markdown("**가중치 설정 근거**")
@@ -500,19 +499,9 @@ SurviQuant는 **'언제 도달하는가'** 라는 시간 차원을 함께 예측
 Tversky & Kahneman (1992) Prospect Theory  
 손실 회피 계수 λ ≈ 2.25 를 기반으로 설계하였습니다.
 
-◦ 안정형: 31/69 (λ=2.25) — 손실 최소화 우선  
-◦ 중립형: 50/50 (λ=1.0)  — 수익·방어 균형  
-◦ 공격형: 69/31 (λ=0.44) — 고수익 추구
-        """)
-        st.divider()
-
-        st.markdown("**모델 신뢰도**")
-        st.markdown("""
-C-index 0.7 이상은 임상·금융 분야 모두에서 실용적 수준으로 인정받는 기준입니다.
-
-◦ 수익 모델 C-index: 0.7087  
-◦ 손실 모델 C-index: 0.7681  
-◦ 핵심 예측 변수: Volatility (HR 수익 2.87 / HR 손실 5.28)
+◦ 안정형: 31/69 (λ=2.25) - 손실 최소화 우선  
+◦ 중립형: 50/50 (λ=1.0)  - 수익·방어 균형  
+◦ 공격형: 69/31 (λ=0.44) - 고수익 추구
         """)
         st.divider()
 
