@@ -43,7 +43,13 @@ def load_scores():
 
 @st.cache_data(show_spinner="📊 OHLCV·기술지표 로딩 중...")
 def load_ohlcv():
-    df = pd.read_csv(DATA_DIR / "ohlcv_cache.csv")
+    # parquet 우선, 없으면 csv 폴백
+    parquet_path = DATA_DIR / "ohlcv_cache.parquet"
+    csv_path     = DATA_DIR / "ohlcv_cache.csv"
+    if parquet_path.exists():
+        df = pd.read_parquet(parquet_path)
+    else:
+        df = pd.read_csv(csv_path)
     df["Date"] = pd.to_datetime(df["Date"])
     return df
 
