@@ -18,12 +18,13 @@ jobs:
           python-version: '3.10'
 
       - name: 패키지 설치
-        run: pip install -r requirements.txt
+        run: pip install -r requirements_dev.txt
 
       - name: 일일 주가 수집 및 스코어 갱신 추론
         run: |
           python src/data_loader.py
           python src/export.py
+          python src/fetch_company_info.py
 
       - name: 갱신된 JSON 정적 파일 커밋 및 푸시
         run: |
