@@ -32,9 +32,40 @@ st.set_page_config(
 # 컨테이너 border-radius 강화
 st.markdown("""
 <style>
+/* 둥근 테두리 */
 [data-testid="stVerticalBlockBorderWrapper"] > div:first-child {
     border-radius: 14px !important;
     border: 1px solid #E5E7EB !important;
+}
+
+/* 3열 컨테이너 동일 높이 */
+.equal-height-col [data-testid="stVerticalBlockBorderWrapper"] {
+    height: 100%;
+}
+.equal-height-col [data-testid="stVerticalBlock"] {
+    height: 100%;
+}
+
+/* 섹션 타이틀 통일 (h4) */
+h4 {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #111827 !important;
+    margin-bottom: 8px !important;
+}
+
+/* st.metric 라벨 크기 통일 */
+[data-testid="stMetricLabel"] {
+    font-size: 12px !important;
+}
+[data-testid="stMetricValue"] {
+    font-size: 18px !important;
+}
+
+/* caption 크기 */
+[data-testid="stCaptionContainer"] p {
+    font-size: 12px !important;
+    color: #6B7280 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -461,21 +492,21 @@ with ticker_col:
 with company_col:
     company = get_company_info(sel_ticker, company_db)
     with st.container(border=True):
-        st.markdown(f"**{company['name']}** ({sel_ticker})")
-        if company["industry"]:
-            st.caption(f"업종: {company['industry']}")
-        summary = company["summary"]
-        st.caption(summary[:200] + "..." if len(summary) > 200 else summary)
-        info_c1, info_c2, info_c3 = st.columns(3)
-        with info_c1:
-            if company["market_cap"]:
-                st.metric("시가총액", f"${company['market_cap']/1e9:,.1f}B")
-        with info_c2:
-            if company["employees"]:
-                st.metric("임직원 수", f"{company['employees']:,}명")
-        with info_c3:
+        with st.expander(f"🏢 기업 개요 — {company['name']}", expanded=False):
+            st.markdown(f"**{company['name']}** ({sel_ticker})")
+            if company["industry"]:
+                st.caption(f"업종: {company['industry']}")
+            summary = company["summary"]
+            st.markdown(summary[:300] + "..." if len(summary) > 300 else summary)
             if company["website"]:
-                st.markdown(f"[웹사이트]({company['website']})")
+                st.markdown(f"[공식 웹사이트]({company['website']})")
+            ic1, ic2 = st.columns(2)
+            with ic1:
+                if company["market_cap"]:
+                    st.metric("시가총액", f"${company['market_cap']/1e9:,.1f}B")
+            with ic2:
+                if company["employees"]:
+                    st.metric("임직원 수", f"{company['employees']:,}명")
 
 st.divider()
 
@@ -484,8 +515,11 @@ st.divider()
 # ============================================================
 col_surv, col_ins, col_snap = st.columns(3)
 
+BOX_MIN_H = "520px"  # 세 박스 공통 최소 높이
+
 # ── 수익·손실 도달 추이
 with col_surv:
+    st.markdown(f'<div style="min-height:{BOX_MIN_H}">', unsafe_allow_html=True)
     with st.container(border=True):
         surv_h, surv_i = st.columns([5, 1])
         with surv_h:
@@ -537,9 +571,11 @@ RSF 모델의 t=20 종점 확률을 지수분포로 역산한 근사 누적 곡�
             legend=dict(orientation="h", y=1.15, x=0),
             template="plotly_white", hovermode="x unified")
         st.plotly_chart(fig_surv, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ── AI 인사이트
 with col_ins:
+    st.markdown(f'<div style="min-height:{BOX_MIN_H}">', unsafe_allow_html=True)
     with st.container(border=True):
         ins_h, ins_i = st.columns([5, 1])
         with ins_h:
@@ -563,12 +599,14 @@ with col_ins:
             st.markdown(
                 f"""<div style="background:#F8FAFC;border-left:3px solid #3B82F6;
                     padding:8px 12px;border-radius:8px;margin-bottom:7px;">
-                    <div style="font-size:12px;font-weight:600;color:#374151;">{label}</div>
-                    <div style="font-size:11px;color:#6B7280;margin-top:2px;">{message}</div>
+                    <div style="font-size:13px;font-weight:600;color:#374151;">{label}</div>
+                    <div style="font-size:12px;color:#6B7280;margin-top:2px;">{message}</div>
                 </div>""", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ── 최신 지표 스냅샷
 with col_snap:
+    st.markdown(f'<div style="min-height:{BOX_MIN_H}">', unsafe_allow_html=True)
     with st.container(border=True):
         st.markdown("#### 📌 최신 지표 스냅샷")
 
@@ -586,6 +624,7 @@ with col_snap:
             st.metric("Volatility", f"{latest['Volatility']:.3f}")
         with r2c2:
             st.metric("MA20", f"${latest['MA20']:.2f}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 st.divider()
 
