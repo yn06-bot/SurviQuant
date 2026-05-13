@@ -63,10 +63,32 @@ h4 {
     font-size: 18px !important;
 }
 
-/* ── caption ── */
+/* ── caption 더 진하게 ── */
 [data-testid="stCaptionContainer"] p {
     font-size: 12px !important;
-    color: #6B7280 !important;
+    color: #4B5563 !important;
+}
+
+/* ── 사이드바 caption 한층 더 진하게 ── */
+section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {
+    color: #374151 !important;
+}
+
+/* ── markdown 자동 링크 밑줄·취소선 전면 방지 ── */
+[data-testid="stMarkdownContainer"] a,
+[data-testid="stPopover"]           a,
+[data-testid="stExpander"]          a,
+section[data-testid="stSidebar"]    a {
+    text-decoration: none !important;
+    color: inherit !important;
+    pointer-events: none !important;
+}
+
+/* ── del/s 태그 취소선 방지 ── */
+[data-testid="stMarkdownContainer"] del,
+[data-testid="stMarkdownContainer"] s {
+    text-decoration: none !important;
+    color: inherit !important;
 }
 
 /* ── 3열 박스 동일 높이: 컨테이너를 flex column으로 ── */
@@ -297,13 +319,13 @@ def build_unified_chart(ticker, ticker_df, volatility, period_days):
     fig.add_trace(go.Scatter(x=mc_dates, y=mc["p95"],
         line=dict(color="rgba(0,0,0,0)", width=0),
         showlegend=False, hoverinfo="skip"), row=1, col=1)
-    fig.add_trace(go.Scatter(x=mc_dates, y=mc["p05"], name="5~95% 시나리오",
+    fig.add_trace(go.Scatter(x=mc_dates, y=mc["p05"], name="5–95% 시나리오",
         fill="tonexty", fillcolor="rgba(99,102,241,0.09)",
         line=dict(color="rgba(0,0,0,0)", width=0)), row=1, col=1)
     fig.add_trace(go.Scatter(x=mc_dates, y=mc["p75"],
         line=dict(color="rgba(0,0,0,0)", width=0),
         showlegend=False, hoverinfo="skip"), row=1, col=1)
-    fig.add_trace(go.Scatter(x=mc_dates, y=mc["p25"], name="25~75% 시나리오",
+    fig.add_trace(go.Scatter(x=mc_dates, y=mc["p25"], name="25–75% 시나리오",
         fill="tonexty", fillcolor="rgba(99,102,241,0.18)",
         line=dict(color="rgba(0,0,0,0)", width=0)), row=1, col=1)
     fig.add_trace(go.Scatter(x=mc_dates, y=mc["p50"], name="중앙값 예측",
@@ -418,17 +440,29 @@ with st.sidebar:
 
     st.divider()
 
-    st.markdown("#### 모델 정보")
-    universe = meta.get("universe", {})
-    c_index  = meta.get("model_performance_c_index", {})
-    today    = pd.Timestamp.now().strftime("%Y-%m-%d")
-    profit_pct = round(c_index.get("profit_model", 0) * 100)
-    loss_pct   = round(c_index.get("loss_model",   0) * 100)
+    _m_title, _m_info = st.columns([5, 1])
+    with _m_title:
+        st.markdown("#### 모델 성능")
+    with _m_info:
+        with st.popover("ⓘ"):
+            st.markdown("**C-index란?**")
+            st.markdown(
+                "모델이 실제 사건 발생 순서를 얼마나 정확히 예측하는지를 나타내는 지표입니다.\n\n"
+                "◦ 0.5 = 무작위 예측 수준  \n"
+                "◦ 0.7 이상 = 임상·금융 분야에서 실용적 수준  \n"
+                "◦ 1.0 = 완벽한 예측\n\n"
+                "SurviQuant의 C-index는 투자 의사결정 보조 도구로 신뢰할 수 있는 수준입니다."
+            )
+
+    universe   = meta.get("universe", {})
+    c_index    = meta.get("model_performance_c_index", {})
+    today      = pd.Timestamp.now().strftime("%Y-%m-%d")
+    profit_cidx = c_index.get("profit_model", 0)
+    loss_cidx   = c_index.get("loss_model",   0)
 
     st.caption(f"기준일: **{today}**")
-    st.caption("신뢰도 (C-index)")
-    st.caption(f"◦ 수익 모델: **약 {profit_pct}%**")
-    st.caption(f"◦ 손실 모델: **약 {loss_pct}%**")
+    st.caption(f"◦ 수익 모델 C-index: **{profit_cidx:.4f}**")
+    st.caption(f"◦ 손실 모델 C-index: **{loss_cidx:.4f}**")
     st.divider()
     st.caption(f"생존분석 대상: **{universe.get('survival_records_tickers', 223)}개** 종목")
     st.caption(f"RSF 학습·추론: **{universe.get('modeled_tickers', 50)}개** 종목")
@@ -474,13 +508,13 @@ SurviQuant는 **'언제 도달하는가'** 라는 시간 차원을 함께 예측
 
 ◦ 수익 사건: 매수 시점 대비 +10% 도달까지의 시간  
 ◦ 손실 사건: 매수 시점 대비 −10% 도달까지의 시간  
-◦ 예측: 20영업일 고정
+◦ 예측 Horizon: 고정 20영업일
         """)
         st.divider()
 
         st.markdown("**데이터 범위**")
         st.markdown("""
-◦ 학습 기간: 2010.01 ~ 2026.04 (약 16년)  
+◦ 학습 기간: 2010.01–2026.04 (약 16년)  
 ◦ 생존분석 레코드: 853,504건  
 ◦ EDA 대상: S&P 500 223개 종목  
 ◦ RSF 추론 대상: 50개 (5섹터 대표주)
@@ -489,9 +523,10 @@ SurviQuant는 **'언제 도달하는가'** 라는 시간 차원을 함께 예측
 
         st.markdown("**AI Score 공식**")
         st.code(
-            "AI Score = Profit_Chance × w_profit\n + (100 − Loss_Risk) × w_defense",
+            "AI Score = Profit_Chance × w_profit\n"
+            "         + (100 − Loss_Risk) × w_defense",
             language="python")
-        st.markdown("수익과 하락 방지를 동시에 반영해 단순 확률보다 실용적인 지표를 제공합니다.")
+        st.markdown("수익 동력과 하방 방어를 동시에 반영해 단순 확률보다 실용적인 지표를 제공합니다.")
         st.divider()
 
         st.markdown("**가중치 설정 근거**")
@@ -499,9 +534,9 @@ SurviQuant는 **'언제 도달하는가'** 라는 시간 차원을 함께 예측
 Tversky & Kahneman (1992) Prospect Theory  
 손실 회피 계수 λ ≈ 2.25 를 기반으로 설계하였습니다.
 
-◦ 안정형: 31/69 (λ=2.25) - 손실 최소화 우선  
-◦ 중립형: 50/50 (λ=1.0)  - 수익·방어 균형  
-◦ 공격형: 69/31 (λ=0.44) - 고수익 추구
+◦ 안정형: 31/69 (λ=2.25) — 손실 최소화 우선  
+◦ 중립형: 50/50 (λ=1.0)  — 수익·방어 균형  
+◦ 공격형: 69/31 (λ=0.44) — 고수익 추구
         """)
         st.divider()
 
@@ -530,7 +565,7 @@ with ctrl2:
     )
     # [수정 7] help= 물음표 제거
     sel_ticker = st.selectbox(
-        "종목 선택",
+        "종목 선택 (AI Score 내림차순)",
         options=ticker_options,
     )
 with ctrl3:
@@ -724,8 +759,8 @@ with st.container(border=True):
 
 **미래 구간** (노란 점선 이후)
 
-◦ 연보라 밴드: 5~95% 시나리오  
-◦ 진보라 밴드: 25~75% 시나리오  
+◦ 연보라 밴드: 5–95% 시나리오  
+◦ 진보라 밴드: 25–75% 시나리오  
 ◦ 보라 점선: 중앙값(50th) 예측 경로
 
 **보조 지표**
