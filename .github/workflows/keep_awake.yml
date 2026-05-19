@@ -12,5 +12,5 @@ jobs:
       - name: Ping SurviQuant
         run: |
           curl -L --max-time 60 -o /dev/null -w "%{http_code}" \
-            https://surviquant.streamlit.app/_stcore/health \
+            https://surviquant.streamlit.app/ \
           && echo " ✅ Awake"
